@@ -1,8 +1,8 @@
 
-#include <SDL.h>
+#include "Application.h"
 
 int main(int argc, char** argv)
 {
-
-	return 0;
+	Engine* engine = new Application();
+	return engine->Execute(argc, argv);
 }

@@ -48,15 +48,16 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)-$(Platform)\</IntDir>
-    <IncludePath>$(SDL2)\Include</IncludePath>
     <LibraryPath>$(SDL2)\VisualC\bin\SDL2\Release-x64;$(SDL2)\VisualC\bin\SDL2main\Release-x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SDL2)\Include;$(IncludePath)</IncludePath>
+    <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)-$(Platform)\</IntDir>
-    <IncludePath>$(SDL2)\Include</IncludePath>
     <LibraryPath>$(SDL2)\VisualC\bin\SDL2\Release-x64;$(SDL2)\VisualC\bin\SDL2main\Release-x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SDL2)\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -64,11 +65,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\Common;..\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -89,7 +91,40 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Common\Engine.cpp" />
+    <ClCompile Include="..\Common\Events.cpp" />
+    <ClCompile Include="..\Common\InputEvents.cpp" />
+    <ClCompile Include="..\Common\MainWindow.cpp" />
+    <ClCompile Include="..\Common\RenderDevice.cpp" />
+    <ClCompile Include="..\Common\Shader.cpp" />
+    <ClCompile Include="..\Common\WindowEvents.cpp" />
+    <ClCompile Include="..\imgui\examples\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\imgui\examples\imgui_impl_sdl.cpp" />
+    <ClCompile Include="..\imgui\imgui.cpp" />
+    <ClCompile Include="..\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Common\Engine.h" />
+    <ClInclude Include="..\Common\Events.h" />
+    <ClInclude Include="..\Common\Input.h" />
+    <ClInclude Include="..\Common\InputEvents.h" />
+    <ClInclude Include="..\Common\MainWindow.h" />
+    <ClInclude Include="..\Common\RenderDevice.h" />
+    <ClInclude Include="..\Common\Shader.h" />
+    <ClInclude Include="..\Common\WindowEvents.h" />
+    <ClInclude Include="..\imgui\examples\imgui_impl_dx11.h" />
+    <ClInclude Include="..\imgui\examples\imgui_impl_sdl.h" />
+    <ClInclude Include="..\imgui\imconfig.h" />
+    <ClInclude Include="..\imgui\imgui.h" />
+    <ClInclude Include="..\imgui\imgui_internal.h" />
+    <ClInclude Include="..\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\imgui\imstb_truetype.h" />
+    <ClInclude Include="Application.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
