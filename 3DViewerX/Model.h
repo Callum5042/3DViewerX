@@ -10,6 +10,7 @@ public:
 
 	bool Load(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
 
+	void Update();
 	void Render(ID3D11DeviceContext* deviceContext);
 
 private:
@@ -18,4 +19,8 @@ private:
 	XMMATRIX m_Projection;
 
 	ID3D11Buffer* m_ConstantBuffer = nullptr;
+
+	float m_AxisX = 0.0f;
+	float m_AxisY = 0.0f;
+	float m_AxisZ = 0.0f;
 };

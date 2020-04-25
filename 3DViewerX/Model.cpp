@@ -1,4 +1,5 @@
 #include "Model.h"
+#include <imgui.h>
 
 struct SimpleVertex
 {
@@ -142,6 +143,24 @@ bool Model::Load(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
 	m_Projection = XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, screenAspect, 0.01f, 100.0f);
 
 	return true;
+}
+
+void Model::Update()
+{
+	bool my_tool_active;
+	ImGui::Begin("Model", &my_tool_active, ImGuiWindowFlags_None);
+	ImGui::SetNextWindowSize(ImVec2(200, 200));
+
+	ImGui::Text("Rotation");
+	ImGui::SliderFloat("X-Axis", &m_AxisX, 0.0f, 360.0f);
+	ImGui::SliderFloat("Y-Axis", &m_AxisY, 0.0f, 360.0f);
+	ImGui::SliderFloat("Z-Axis", &m_AxisZ, 0.0f, 360.0f);
+
+	m_World = XMMatrixRotationX(DirectX::XMConvertToRadians(m_AxisX));
+	m_World *= XMMatrixRotationY(DirectX::XMConvertToRadians(m_AxisY));
+	m_World *= XMMatrixRotationZ(DirectX::XMConvertToRadians(m_AxisZ));
+
+	ImGui::End();
 }
 
 void Model::Render(ID3D11DeviceContext* deviceContext)

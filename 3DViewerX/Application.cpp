@@ -27,18 +27,15 @@ bool Application::OnInitialise()
 
 void Application::OnUpdate()
 {
-
-}
-
-void Application::OnRender()
-{
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplSDL2_NewFrame(GetWindow()->GetWindow());
 	ImGui::NewFrame();
 
-	bool show = true;
-	ImGui::ShowDemoWindow(&show);
+	m_Model->Update();
+}
 
+void Application::OnRender()
+{
 	m_Renderer->ClearScreen();
 
 	// Shader thing
