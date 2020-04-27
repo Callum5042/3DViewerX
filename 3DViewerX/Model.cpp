@@ -17,7 +17,11 @@ struct ConstantBuffer
 	XMMATRIX mProjection;
 };
 
-bool Model::Load(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
+Model::Model(Renderer* renderer) : m_Renderer(renderer)
+{
+}
+
+bool Model::Load()
 {
 	// Drawing
 	SimpleVertex vertices[] =
@@ -85,7 +89,7 @@ bool Model::Load(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
 	vInitData.pSysMem = vertices;
 
 	ID3D11Buffer* vertexBuffer = nullptr;
-	HRESULT hr = device->CreateBuffer(&vbd, &vInitData, &vertexBuffer);
+	HRESULT hr = m_Renderer->GetDevice()->CreateBuffer(&vbd, &vInitData, &vertexBuffer);
 	if (FAILED(hr))
 		return false;
 
@@ -93,7 +97,7 @@ bool Model::Load(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
 	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
 
-	deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+	m_Renderer->GetDeviceContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	// Index buffer description
 	D3D11_BUFFER_DESC ibd = {};
@@ -106,15 +110,15 @@ bool Model::Load(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
 	iInitData.pSysMem = indices;
 
 	ID3D11Buffer* indexBuffer = nullptr;
-	hr = device->CreateBuffer(&ibd, &iInitData, &indexBuffer);
+	hr = m_Renderer->GetDevice()->CreateBuffer(&ibd, &iInitData, &indexBuffer);
 	if (FAILED(hr))
 		return false;
 
 	// Set vertex buffer
-	deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R16_UINT, 0);
+	m_Renderer->GetDeviceContext()->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
 	// Set primitive topology
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_Renderer->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Constant buffer
 	D3D11_BUFFER_DESC bd = {};
@@ -122,7 +126,7 @@ bool Model::Load(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
 	bd.ByteWidth = sizeof(ConstantBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	hr = device->CreateBuffer(&bd, nullptr, &m_ConstantBuffer);
+	hr = m_Renderer->GetDevice()->CreateBuffer(&bd, nullptr, &m_ConstantBuffer);
 	if (FAILED(hr))
 	{
 		// SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "CreateBuffer failed", nullptr);
@@ -147,8 +151,7 @@ bool Model::Load(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
 
 void Model::Update()
 {
-	bool my_tool_active;
-	ImGui::Begin("Model", &my_tool_active, ImGuiWindowFlags_None);
+	ImGui::Begin("Model");
 	ImGui::SetNextWindowSize(ImVec2(200, 200));
 
 	ImGui::Text("Rotation");
@@ -156,14 +159,18 @@ void Model::Update()
 	ImGui::SliderFloat("Y-Axis", &m_AxisY, 0.0f, 360.0f);
 	ImGui::SliderFloat("Z-Axis", &m_AxisZ, 0.0f, 360.0f);
 
+	ImGui::Checkbox("Wireframe", &m_Wireframe);
+
 	m_World = XMMatrixRotationX(DirectX::XMConvertToRadians(m_AxisX));
 	m_World *= XMMatrixRotationY(DirectX::XMConvertToRadians(m_AxisY));
 	m_World *= XMMatrixRotationZ(DirectX::XMConvertToRadians(m_AxisZ));
 
+
+
 	ImGui::End();
 }
 
-void Model::Render(ID3D11DeviceContext* deviceContext)
+void Model::Render()
 {
 	// Shader thing
 	ConstantBuffer cb;
@@ -171,11 +178,34 @@ void Model::Render(ID3D11DeviceContext* deviceContext)
 	cb.mView = XMMatrixTranspose(m_View);
 	cb.mProjection = XMMatrixTranspose(m_Projection);
 
-	deviceContext->VSSetConstantBuffers(0, 1, &m_ConstantBuffer);
-	deviceContext->PSSetConstantBuffers(0, 1, &m_ConstantBuffer);
+	m_Renderer->GetDeviceContext()->VSSetConstantBuffers(0, 1, &m_ConstantBuffer);
+	m_Renderer->GetDeviceContext()->PSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 
-	deviceContext->UpdateSubresource(m_ConstantBuffer, 0, nullptr, &cb, 0, 0);
+	m_Renderer->GetDeviceContext()->UpdateSubresource(m_ConstantBuffer, 0, nullptr, &cb, 0, 0);
+
+	SetRasterState();
 
 	// Render triangle
-	deviceContext->DrawIndexed(36, 0, 0);
+	m_Renderer->GetDeviceContext()->DrawIndexed(36, 0, 0);
+}
+
+void Model::SetRasterState()
+{
+	D3D11_RASTERIZER_DESC rasterizerState;
+	ZeroMemory(&rasterizerState, sizeof(D3D11_RASTERIZER_DESC));
+
+	rasterizerState.AntialiasedLineEnable = false;
+	rasterizerState.CullMode = D3D11_CULL_NONE; // D3D11_CULL_FRONT or D3D11_CULL_NONE D3D11_CULL_BACK
+	rasterizerState.FillMode = (m_Wireframe ? D3D11_FILL_WIREFRAME : D3D11_FILL_SOLID); // D3D11_FILL_SOLID  D3D11_FILL_WIREFRAME
+	rasterizerState.DepthBias = 0;
+	rasterizerState.DepthBiasClamp = 0.0f;
+	rasterizerState.DepthClipEnable = true;
+	rasterizerState.FrontCounterClockwise = false;
+	rasterizerState.MultisampleEnable = false;
+	rasterizerState.ScissorEnable = false;
+	rasterizerState.SlopeScaledDepthBias = 0.0f;
+
+	ID3D11RasterizerState* m_pRasterState;
+	HRESULT result = m_Renderer->GetDevice()->CreateRasterizerState(&rasterizerState, &m_pRasterState);
+	m_Renderer->GetDeviceContext()->RSSetState(m_pRasterState);
 }

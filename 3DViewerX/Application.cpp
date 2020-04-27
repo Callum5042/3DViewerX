@@ -19,8 +19,8 @@ bool Application::OnInitialise()
 	ImGui_ImplSDL2_InitForD3D(GetWindow()->GetWindow());
 	ImGui_ImplDX11_Init(m_Renderer->GetDevice(), m_Renderer->GetDeviceContext());
 
-	m_Model = new Model();
-	m_Model->Load(m_Renderer->GetDevice(), m_Renderer->GetDeviceContext());
+	m_Model = new Model(m_Renderer);
+	m_Model->Load();
 
 	return true;
 }
@@ -39,7 +39,7 @@ void Application::OnRender()
 	m_Renderer->ClearScreen();
 
 	// Shader thing
-	m_Model->Render(m_Renderer->GetDeviceContext());
+	m_Model->Render();
 
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

@@ -2,16 +2,18 @@
 
 #include <d3d11_4.h>
 #include <DirectXMath.h>
+#include "Renderer.h"
 using namespace DirectX;
 
 class Model
 {
 public:
+	Model(Renderer* renderer);
 
-	bool Load(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
+	bool Load();
 
 	void Update();
-	void Render(ID3D11DeviceContext* deviceContext);
+	void Render();
 
 private:
 	XMMATRIX m_World;
@@ -23,4 +25,10 @@ private:
 	float m_AxisX = 0.0f;
 	float m_AxisY = 0.0f;
 	float m_AxisZ = 0.0f;
+
+	bool m_Wireframe = false;
+
+	void SetRasterState();
+
+	Renderer* m_Renderer = nullptr;
 };
