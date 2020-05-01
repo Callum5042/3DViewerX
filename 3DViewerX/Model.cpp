@@ -47,6 +47,9 @@ bool Model::Load()
 
 			//Create a vertex to store the mesh's vertices temporarily
 			SimpleVertex tempVertex(x, y, z);
+			tempVertex.nx = static_cast<float>(mesh->mNormals[j].x);
+			tempVertex.ny = static_cast<float>(mesh->mNormals[j].y);
+			tempVertex.nz = static_cast<float>(mesh->mNormals[j].z);
 
 			//Add the vertex to the vertices vector
 			m_Vertices.push_back(tempVertex);
@@ -69,7 +72,7 @@ bool Model::Load()
 	// Vertex duffer description
 	D3D11_BUFFER_DESC vbd = {};
 	vbd.Usage = D3D11_USAGE_DEFAULT;
-	vbd.ByteWidth = sizeof(SimpleVertex) * m_Vertices.size();
+	vbd.ByteWidth = sizeof(SimpleVertex) * static_cast<UINT>(m_Vertices.size());
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 
@@ -92,7 +95,7 @@ bool Model::Load()
 	// Index buffer description
 	D3D11_BUFFER_DESC ibd = {};
 	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.ByteWidth = sizeof(WORD) * m_Indices.size();
+	ibd.ByteWidth = sizeof(WORD) * static_cast<UINT>(m_Indices.size());
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 
@@ -177,7 +180,7 @@ void Model::Render()
 	SetRasterState();
 
 	// Render triangle
-	m_Renderer->GetDeviceContext()->DrawIndexed(m_Indices.size(), 0, 0);
+	m_Renderer->GetDeviceContext()->DrawIndexed(static_cast<UINT>(m_Indices.size()), 0, 0);
 }
 
 void Model::SetRasterState()

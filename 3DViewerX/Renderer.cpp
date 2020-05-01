@@ -21,10 +21,10 @@ bool Renderer::Init()
 	SetViewport();
 
 	// Create shaders
-	if (!CreateVertexShader("D:\\Sources\\Testing\\DirectX.Testing\\bin\\DirectX.Drawing\\Debug-x64\\VertexShader.cso"))
+	if (!CreateVertexShader("D:\\Sources\\3DViewerX\\bin\\3DViewerX\\Debug-x64\\VertexShader.cso"))
 		return false;
 
-	if (!CreatePixelShader("D:\\Sources\\Testing\\DirectX.Testing\\bin\\DirectX.Drawing\\Debug-x64\\PixelShader.cso"))
+	if (!CreatePixelShader("D:\\Sources\\3DViewerX\\bin\\3DViewerX\\Debug-x64\\PixelShader.cso"))
 		return false;
 
 	return true;
@@ -242,6 +242,7 @@ bool Renderer::CreateVertexShader(std::string&& vertexShaderPath)
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 	UINT numElements = ARRAYSIZE(layout);

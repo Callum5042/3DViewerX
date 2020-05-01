@@ -8,10 +8,13 @@ cbuffer ConstantBuffer : register(b0)
 
 struct VS_INPUT
 {
-	float4 Pos : POSITION;
+	float3 PosL : POSITION;
+	float3 NormalL : NORMAL;
 };
 
 struct PS_INPUT
 {
-	float4 Pos : SV_POSITION;
+	float3 PosW : POSITION;
+	float4 PosH : SV_POSITION;
+	float3 NormalW : NORMAL;
 };

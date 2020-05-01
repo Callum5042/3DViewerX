@@ -4,9 +4,15 @@
 PS_INPUT main(VS_INPUT input)
 {
 	PS_INPUT output;
-	output.Pos = mul(input.Pos, World);
-	output.Pos = mul(output.Pos, View);
-	output.Pos = mul(output.Pos, Projection);
+
+	// Transform to world space space.
+	output.PosW = mul(float4(input.PosL, 1.0f), World).xyz;
+	output.NormalW = mul(input.NormalL, (float3x3)World);
+
+	// Transform to homogeneous clip space.
+	output.PosH = mul(float4(input.PosL, 1.0f), World);
+	output.PosH = mul(output.PosH, View);
+	output.PosH = mul(output.PosH, Projection);
 
 	return output;
 }
