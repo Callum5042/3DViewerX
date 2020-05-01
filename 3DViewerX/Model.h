@@ -3,7 +3,17 @@
 #include <d3d11_4.h>
 #include <DirectXMath.h>
 #include "Renderer.h"
+#include <vector>
 using namespace DirectX;
+
+struct SimpleVertex
+{
+	SimpleVertex(float x, float y, float z) : x(x), y(y), z(z) {}
+
+	float x;
+	float y;
+	float z;
+};
 
 class Model
 {
@@ -31,4 +41,7 @@ private:
 	void SetRasterState();
 
 	Renderer* m_Renderer = nullptr;
+
+	std::vector<SimpleVertex> m_Vertices;
+	std::vector<WORD> m_Indices;
 };

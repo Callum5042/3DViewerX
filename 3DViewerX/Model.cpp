@@ -1,14 +1,13 @@
 #include "Model.h"
 #include <imgui.h>
 
-struct SimpleVertex
-{
-	SimpleVertex(float x, float y, float z) : x(x), y(y), z(z) {}
+#undef min
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
-	float x;
-	float y;
-	float z;
-};
+#include <iostream>
+#include <vector>
 
 struct ConstantBuffer
 {
@@ -24,75 +23,66 @@ Model::Model(Renderer* renderer) : m_Renderer(renderer)
 bool Model::Load()
 {
 	// Drawing
-	SimpleVertex vertices[] =
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile("C:\\Users\\Callum\\Desktop\\3d models\\monkey.obj", aiProcess_Triangulate | aiProcess_FlipUVs);
+
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		{ -1.0f, 1.0f, -1.0f },
-		{ 1.0f, 1.0f, -1.0f },
-		{ 1.0f, 1.0f, 1.0f },
-		{ -1.0f, 1.0f, 1.0f },
+		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+		return false;
+	}
 
-		{ -1.0f, -1.0f, -1.0f },
-		{ 1.0f, -1.0f, -1.0f },
-		{ 1.0f, -1.0f, 1.0f },
-		{ -1.0f, -1.0f, 1.0f },
-
-		{ -1.0f, -1.0f, 1.0f },
-		{ -1.0f, -1.0f, -1.0f },
-		{ -1.0f, 1.0f, -1.0f },
-		{ -1.0f, 1.0f, 1.0f },
-
-		{ 1.0f, -1.0f, 1.0f },
-		{ 1.0f, -1.0f, -1.0f },
-		{ 1.0f, 1.0f, -1.0f },
-		{ 1.0f, 1.0f, 1.0f },
-
-		{ -1.0f, -1.0f, -1.0f },
-		{ 1.0f, -1.0f, -1.0f },
-		{ 1.0f, 1.0f, -1.0f },
-		{ -1.0f, 1.0f, -1.0f },
-
-		{ -1.0f, -1.0f, 1.0f },
-		{ 1.0f, -1.0f, 1.0f },
-		{ 1.0f, 1.0f, 1.0f },
-		{ -1.0f, 1.0f, 1.0f },
-	};
-
-	WORD indices[] =
+	for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
 	{
-		3,1,0,
-		2,1,3,
+		//Get the mesh
+		aiMesh* mesh = scene->mMeshes[i];
 
-		6,4,5,
-		7,4,6,
+		//Iterate over the vertices of the mesh
+		for (unsigned int j = 0; j < mesh->mNumVertices; ++j)
+		{
+			//Set the positions
+			float x = static_cast<float>(mesh->mVertices[j].x);
+			float y = static_cast<float>(mesh->mVertices[j].y);
+			float z = static_cast<float>(mesh->mVertices[j].z);
 
-		11,9,8,
-		10,9,11,
+			//Create a vertex to store the mesh's vertices temporarily
+			SimpleVertex tempVertex(x, y, z);
 
-		14,12,13,
-		15,12,14,
+			//Add the vertex to the vertices vector
+			m_Vertices.push_back(tempVertex);
+		}
 
-		19,17,16,
-		18,17,19,
+		//Iterate over the faces of the mesh
+		for (unsigned int j = 0; j < mesh->mNumFaces; ++j)
+		{
+			//Get the face
+			aiFace face = mesh->mFaces[j];
 
-		22,20,21,
-		23,20,22
-	};
+			//Add the indices of the face to the vector
+			for (unsigned int k = 0; k < face.mNumIndices; ++k) 
+			{ 
+				m_Indices.push_back(face.mIndices[k]); 
+			}
+		}
+	}
 
 	// Vertex duffer description
 	D3D11_BUFFER_DESC vbd = {};
 	vbd.Usage = D3D11_USAGE_DEFAULT;
-	vbd.ByteWidth = sizeof(vertices);
+	vbd.ByteWidth = sizeof(SimpleVertex) * m_Vertices.size();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA vInitData = {};
-	vInitData.pSysMem = vertices;
+
+	const SimpleVertex* vert = &m_Vertices[0];
+	vInitData.pSysMem = vert;
 
 	ID3D11Buffer* vertexBuffer = nullptr;
 	HRESULT hr = m_Renderer->GetDevice()->CreateBuffer(&vbd, &vInitData, &vertexBuffer);
 	if (FAILED(hr))
 		return false;
-
+	  
 	// Set vertex buffer
 	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
@@ -102,12 +92,13 @@ bool Model::Load()
 	// Index buffer description
 	D3D11_BUFFER_DESC ibd = {};
 	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.ByteWidth = sizeof(indices);
+	ibd.ByteWidth = sizeof(WORD) * m_Indices.size();
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA iInitData = {};
-	iInitData.pSysMem = indices;
+	const WORD* index = &m_Indices[0];
+	iInitData.pSysMem = index;
 
 	ID3D11Buffer* indexBuffer = nullptr;
 	hr = m_Renderer->GetDevice()->CreateBuffer(&ibd, &iInitData, &indexBuffer);
@@ -186,7 +177,7 @@ void Model::Render()
 	SetRasterState();
 
 	// Render triangle
-	m_Renderer->GetDeviceContext()->DrawIndexed(36, 0, 0);
+	m_Renderer->GetDeviceContext()->DrawIndexed(m_Indices.size(), 0, 0);
 }
 
 void Model::SetRasterState()
@@ -200,7 +191,7 @@ void Model::SetRasterState()
 	rasterizerState.DepthBias = 0;
 	rasterizerState.DepthBiasClamp = 0.0f;
 	rasterizerState.DepthClipEnable = true;
-	rasterizerState.FrontCounterClockwise = false;
+	rasterizerState.FrontCounterClockwise = true;
 	rasterizerState.MultisampleEnable = false;
 	rasterizerState.ScissorEnable = false;
 	rasterizerState.SlopeScaledDepthBias = 0.0f;

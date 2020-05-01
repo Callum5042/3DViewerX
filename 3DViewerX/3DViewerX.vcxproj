@@ -48,8 +48,8 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)-$(Platform)\</IntDir>
-    <LibraryPath>$(SDL2)\VisualC\bin\SDL2\Release-x64;$(SDL2)\VisualC\bin\SDL2main\Release-x64;D:\DirectX\dx\DirectXTK\Bin\Desktop_2019\x64\Debug;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SDL2)\Include;D:\DirectX\dx\DirectXTK\Inc;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SDL2)\VisualC\bin\SDL2\Release-x64;$(SDL2)\VisualC\bin\SDL2main\Release-x64;D:\DirectX\dx\DirectXTK\Bin\Desktop_2019\x64\Debug;E:\assimp\src\bin\lib\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SDL2)\Include;D:\DirectX\dx\DirectXTK\Inc;E:\assimp\src\include;E:\assimp\src\bin\include;$(IncludePath)</IncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -70,7 +70,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;d3d11.lib;DirectXTK.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;d3d11.lib;DirectXTK.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
