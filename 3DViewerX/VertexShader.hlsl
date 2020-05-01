@@ -14,5 +14,7 @@ PS_INPUT main(VS_INPUT input)
 	output.PosH = mul(output.PosH, View);
 	output.PosH = mul(output.PosH, Projection);
 
+	output.Tex = input.Tex;
+
 	return output;
 }

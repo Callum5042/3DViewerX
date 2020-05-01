@@ -1,5 +1,6 @@
 #include "Model.h"
 #include <imgui.h>
+#include <DDSTextureLoader.h>
 
 #undef min
 #include <assimp/Importer.hpp>
@@ -8,6 +9,9 @@
 
 #include <iostream>
 #include <vector>
+
+#include "Engine.h"
+#include "MainWindow.h"
 
 struct ConstantBuffer
 {
@@ -24,7 +28,7 @@ bool Model::Load()
 {
 	// Drawing
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("C:\\Users\\Callum\\Desktop\\3d models\\monkey.obj", aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile("C:\\Users\\Callum\\Desktop\\3d models\\cube.obj", aiProcess_Triangulate | aiProcess_FlipUVs);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -46,13 +50,19 @@ bool Model::Load()
 			float z = static_cast<float>(mesh->mVertices[j].z);
 
 			//Create a vertex to store the mesh's vertices temporarily
-			SimpleVertex tempVertex(x, y, z);
-			tempVertex.nx = static_cast<float>(mesh->mNormals[j].x);
-			tempVertex.ny = static_cast<float>(mesh->mNormals[j].y);
-			tempVertex.nz = static_cast<float>(mesh->mNormals[j].z);
+			SimpleVertex vertex(x, y, z);
+			vertex.nx = static_cast<float>(mesh->mNormals[j].x);
+			vertex.ny = static_cast<float>(mesh->mNormals[j].y);
+			vertex.nz = static_cast<float>(mesh->mNormals[j].z);
+
+			if (mesh->mTextureCoords[0]) 
+			{
+				vertex.u = (float)mesh->mTextureCoords[0][i].x;
+				vertex.v = (float)mesh->mTextureCoords[0][i].y;
+			}
 
 			//Add the vertex to the vertices vector
-			m_Vertices.push_back(tempVertex);
+			m_Vertices.push_back(vertex);
 		}
 
 		//Iterate over the faces of the mesh
@@ -130,15 +140,21 @@ bool Model::Load()
 	// Perspective View
 	m_World = XMMatrixIdentity();
 
-	XMVECTOR eye = XMVectorSet(0.0f, 0.0f, -5.0f, 0.0f);
+	XMVECTOR eye = XMVectorSet(0.0f, 0.0f, -4.0f, 0.0f);
 	XMVECTOR at = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	m_View = XMMatrixLookAtLH(eye, at, up);
 
+	MainWindow* window = Engine::GetInstance()->GetWindow();
+
 	// Create the projection matrix for 3D rendering.
 	float fieldOfView = 85 * DirectX::XM_PI / 180;
-	float screenAspect = (float)800 / (float)600;
-	m_Projection = XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, screenAspect, 0.01f, 100.0f);
+	float screenAspect = static_cast<float>(window->GetWidth()) / static_cast<float>(window->GetHeight());
+	m_Projection = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.01f, 100.0f);
+
+	// Texture
+	ID3D11Resource* texResource = nullptr;
+	DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), L"C:\\Users\\Callum\\Desktop\\3d models\\cube_texture.dds", &texResource, &m_DiffuseMapSRV));
 
 	return true;
 }
@@ -159,8 +175,6 @@ void Model::Update()
 	m_World *= XMMatrixRotationY(DirectX::XMConvertToRadians(m_AxisY));
 	m_World *= XMMatrixRotationZ(DirectX::XMConvertToRadians(m_AxisZ));
 
-
-
 	ImGui::End();
 }
 
@@ -174,6 +188,7 @@ void Model::Render()
 
 	m_Renderer->GetDeviceContext()->VSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 	m_Renderer->GetDeviceContext()->PSSetConstantBuffers(0, 1, &m_ConstantBuffer);
+	m_Renderer->GetDeviceContext()->PSSetShaderResources(0, 1, &m_DiffuseMapSRV);
 
 	m_Renderer->GetDeviceContext()->UpdateSubresource(m_ConstantBuffer, 0, nullptr, &cb, 0, 0);
 
@@ -182,6 +197,13 @@ void Model::Render()
 	// Render triangle
 	m_Renderer->GetDeviceContext()->DrawIndexed(static_cast<UINT>(m_Indices.size()), 0, 0);
 }
+
+void Model::OnResize(int width, int height)
+{
+	float fieldOfView = 85 * DirectX::XM_PI / 180;
+	float screenAspect = static_cast<float>(width) / static_cast<float>(height);
+	m_Projection = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.01f, 100.0f);
+} 
 
 void Model::SetRasterState()
 {

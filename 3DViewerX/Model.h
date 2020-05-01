@@ -4,6 +4,7 @@
 #include <DirectXMath.h>
 #include "Renderer.h"
 #include <vector>
+#include "WindowEvents.h"
 using namespace DirectX;
 
 struct SimpleVertex
@@ -17,9 +18,12 @@ struct SimpleVertex
 	float nx;
 	float ny;
 	float nz;
+
+	float u;
+	float v;
 };
 
-class Model
+class Model : public Events::WindowListener
 {
 public:
 	Model(Renderer* renderer);
@@ -28,6 +32,9 @@ public:
 
 	void Update();
 	void Render();
+
+	// Window Events
+	void OnResize(int width, int height) override;
 
 private:
 	XMMATRIX m_World;
@@ -48,4 +55,6 @@ private:
 
 	std::vector<SimpleVertex> m_Vertices;
 	std::vector<WORD> m_Indices;
+
+	ID3D11ShaderResourceView* m_DiffuseMapSRV;
 };
