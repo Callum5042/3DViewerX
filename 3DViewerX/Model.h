@@ -15,12 +15,12 @@ struct SimpleVertex
 	float y;
 	float z;
 
-	float nx;
-	float ny;
-	float nz;
+	float nx = 0;
+	float ny = 0;
+	float nz = 0;
 
-	float u;
-	float v;
+	float u = 0;
+	float v = 0;
 };
 
 class Model : public Events::WindowListener
