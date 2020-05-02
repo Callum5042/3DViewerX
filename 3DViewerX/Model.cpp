@@ -57,8 +57,8 @@ bool Model::Load()
 
 			if (mesh->mTextureCoords[0]) 
 			{
-				vertex.u = (float)mesh->mTextureCoords[0][i].x;
-				vertex.v = (float)mesh->mTextureCoords[0][i].y;
+				vertex.u = (float)mesh->mTextureCoords[0][j].x;
+				vertex.v = (float)mesh->mTextureCoords[0][j].y;
 			}
 
 			//Add the vertex to the vertices vector
