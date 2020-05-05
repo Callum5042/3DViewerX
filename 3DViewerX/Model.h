@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include <vector>
 #include "WindowEvents.h"
+#include <string>
 using namespace DirectX;
 
 struct SimpleVertex
@@ -28,10 +29,13 @@ class Model : public Events::WindowListener
 public:
 	Model(Renderer* renderer);
 
-	bool Load();
+	bool Load(std::string&& filename);
+	void Unload();
 
 	void Update();
 	void Render();
+
+	constexpr bool IsLoaded() { return m_IsLoaded; };
 
 	// Window Events
 	void OnResize(int width, int height) override;
@@ -57,4 +61,6 @@ private:
 	std::vector<WORD> m_Indices;
 
 	ID3D11ShaderResourceView* m_DiffuseMapSRV;
+
+	bool m_IsLoaded = false;
 };

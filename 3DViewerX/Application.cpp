@@ -8,6 +8,11 @@
 #include "examples/imgui_impl_sdl.h"
 #include "examples/imgui_impl_dx11.h"
 
+#include <filesystem>
+#include <iostream>
+
+#include <Windows.h>
+
 bool Application::OnInitialise()
 {
 	m_Renderer = new Renderer(GetWindow());
@@ -19,10 +24,42 @@ bool Application::OnInitialise()
 	ImGui_ImplSDL2_InitForD3D(GetWindow()->GetWindow());
 	ImGui_ImplDX11_Init(m_Renderer->GetDevice(), m_Renderer->GetDeviceContext());
 
+
 	m_Model = new Model(m_Renderer);
-	m_Model->Load();
+
 
 	return true;
+}
+
+void FileDirectory(std::filesystem::path entry_path, std::filesystem::path* file)
+{
+	std::filesystem::directory_options options = std::filesystem::directory_options::skip_permission_denied;
+	for (const auto& entry : std::filesystem::directory_iterator(entry_path, options))
+	{
+		const auto path = entry.path();
+
+		if (entry.is_directory())
+		{
+			if (ImGui::TreeNode(path.string().c_str()))
+			{
+				FileDirectory(path, file);
+				ImGui::TreePop();
+			}
+		}
+		else if (entry.is_regular_file())
+		{
+			ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
+			ImGui::TreeNodeEx(path.filename().string().c_str(), node_flags);
+			if (ImGui::IsItemClicked())
+			{
+				const std::string extensions = path.extension().string();
+				if (extensions == ".obj")
+				{
+					*file = path;
+				}
+			}
+		}
+	}
 }
 
 void Application::OnUpdate()
@@ -31,7 +68,58 @@ void Application::OnUpdate()
 	ImGui_ImplSDL2_NewFrame(GetWindow()->GetWindow());
 	ImGui::NewFrame();
 
-	m_Model->Update();
+
+	if (m_Model->IsLoaded())
+	{
+		m_Model->Update();
+	}
+
+
+	//bool demo;
+	//ImGui::ShowDemoWindow(&demo);
+
+	// Model loader
+	ImGui::Begin("Load");
+
+	// Get drives
+	DWORD dwSize = MAX_PATH;
+	char szLogicalDrives[MAX_PATH] = { 0 };
+	DWORD dwResult = GetLogicalDriveStringsA(dwSize, szLogicalDrives);
+
+	// Show directory tree
+	if (dwResult > 0 && dwResult <= MAX_PATH)
+	{
+		char* szSingleDrive = szLogicalDrives;
+		while (*szSingleDrive)
+		{
+			if (ImGui::TreeNode(szSingleDrive))
+			{
+				std::filesystem::path path(szSingleDrive);
+
+				std::filesystem::path file;
+				FileDirectory(path, &file);
+				if (std::filesystem::is_regular_file(file))
+				{
+					std::cout << "Load file\n";
+					if (m_Model->IsLoaded())
+					{
+						// Unload
+						m_Model->Unload();
+					}
+
+					m_Model->Load(file.string());
+				}
+
+				ImGui::TreePop();
+			}
+
+			// get the next drive
+			szSingleDrive += strlen(szSingleDrive) + 1;
+		}
+	}
+
+	ImGui::End();
+
 }
 
 void Application::OnRender()
@@ -39,7 +127,10 @@ void Application::OnRender()
 	m_Renderer->ClearScreen();
 
 	// Shader thing
-	m_Model->Render();
+	if (m_Model->IsLoaded())
+	{
+		m_Model->Render();
+	}
 
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

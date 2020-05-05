@@ -24,11 +24,11 @@ Model::Model(Renderer* renderer) : m_Renderer(renderer)
 {
 }
 
-bool Model::Load()
+bool Model::Load(std::string&& filename)
 {
 	// Drawing
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("C:\\Users\\Callum\\Desktop\\3d models\\cube.obj", aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -156,7 +156,18 @@ bool Model::Load()
 	ID3D11Resource* texResource = nullptr;
 	DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), L"C:\\Users\\Callum\\Desktop\\3d models\\cube_texture.dds", &texResource, &m_DiffuseMapSRV));
 
+	m_IsLoaded = true;
 	return true;
+}
+
+void Model::Unload()
+{
+	m_Vertices.clear();
+	m_Indices.clear();
+
+
+
+	m_IsLoaded = false;
 }
 
 void Model::Update()
