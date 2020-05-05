@@ -41,6 +41,8 @@ bool Model::Load(std::string&& filename)
 		//Get the mesh
 		aiMesh* mesh = scene->mMeshes[i];
 
+		m_Name = mesh->mName.C_Str();
+
 		//Iterate over the vertices of the mesh
 		for (unsigned int j = 0; j < mesh->mNumVertices; ++j)
 		{
@@ -182,6 +184,9 @@ void Model::Update()
 {
 	ImGui::Begin("Model");
 	ImGui::SetNextWindowSize(ImVec2(200, 200));
+
+	ImGui::Text("Name: %s", m_Name.c_str());
+	ImGui::Text("Vertices: %i", m_Vertices.size());
 
 	ImGui::Text("Rotation");
 	ImGui::SliderFloat("X-Axis", &m_AxisX, 0.0f, 360.0f);

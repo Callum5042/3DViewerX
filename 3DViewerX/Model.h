@@ -63,4 +63,6 @@ private:
 	ID3D11ShaderResourceView* m_DiffuseMapSRV;
 
 	bool m_IsLoaded = false;
+
+	std::string m_Name;
 };

@@ -68,13 +68,6 @@ void Application::OnUpdate()
 	ImGui_ImplSDL2_NewFrame(GetWindow()->GetWindow());
 	ImGui::NewFrame();
 
-
-	if (m_Model->IsLoaded())
-	{
-		m_Model->Update();
-	}
-
-
 	//bool demo;
 	//ImGui::ShowDemoWindow(&demo);
 
@@ -120,6 +113,10 @@ void Application::OnUpdate()
 
 	ImGui::End();
 
+	if (m_Model->IsLoaded())
+	{
+		m_Model->Update();
+	}
 }
 
 void Application::OnRender()
