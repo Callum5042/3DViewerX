@@ -165,7 +165,15 @@ void Model::Unload()
 	m_Vertices.clear();
 	m_Indices.clear();
 
+	m_AxisX = 0.0f;
+	m_AxisY = 0.0f;
+	m_AxisZ = 0.0f;
 
+	m_DiffuseMapSRV->Release();
+	m_DiffuseMapSRV = nullptr;
+
+	m_ConstantBuffer->Release();
+	m_ConstantBuffer = nullptr;
 
 	m_IsLoaded = false;
 }
