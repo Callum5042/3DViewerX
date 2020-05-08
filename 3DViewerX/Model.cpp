@@ -12,6 +12,32 @@
 
 #include "Engine.h"
 #include "MainWindow.h"
+#include <sstream>
+
+#include <locale>
+#include <codecvt>
+#include <string>
+
+std::string textype;
+std::string determineTextureType(const aiScene* scene, aiMaterial* mat) 
+{
+	aiString textypeStr;
+	mat->GetTexture(aiTextureType_DIFFUSE, 0, &textypeStr);
+	std::string textypeteststr = textypeStr.C_Str();
+	if (textypeteststr == "*0" || textypeteststr == "*1" || textypeteststr == "*2" || textypeteststr == "*3" || textypeteststr == "*4" || textypeteststr == "*5") {
+		if (scene->mTextures[0]->mHeight == 0) {
+			return "embedded compressed texture";
+		}
+		else {
+			return "embedded non-compressed texture";
+		}
+	}
+	if (textypeteststr.find('.') != std::string::npos) {
+		return "textures are on disk";
+	}
+
+	return ".";
+}
 
 struct ConstantBuffer
 {
@@ -26,6 +52,8 @@ Model::Model(Renderer* renderer) : m_Renderer(renderer)
 
 bool Model::Load(std::string&& filename)
 {
+	std::string texture_filename;
+
 	// Drawing
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -77,6 +105,27 @@ bool Model::Load(std::string&& filename)
 			for (unsigned int k = 0; k < face.mNumIndices; ++k) 
 			{ 
 				m_Indices.push_back(face.mIndices[k]); 
+			}
+		}
+
+		// Materials
+		if (mesh->mMaterialIndex >= 0)
+		{
+			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+
+			if (textype.empty()) 
+			{
+				textype = determineTextureType(scene, material);
+			}
+
+			aiTextureType type = aiTextureType_DIFFUSE;
+			for (UINT i = 0; i < material->GetTextureCount(type); i++) 
+			{
+				aiString str;
+				material->GetTexture(type, i, &str);
+				
+				texture_filename = std::string(str.C_Str());
+				std::cout << texture_filename << '\n';
 			}
 		}
 	}
@@ -156,7 +205,12 @@ bool Model::Load(std::string&& filename)
 
 	// Texture
 	ID3D11Resource* texResource = nullptr;
-	DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), L"C:\\Users\\Callum\\Desktop\\3d models\\cube_texture.dds", &texResource, &m_DiffuseMapSRV));
+
+	std::wstringstream texture_filename_stream;
+	texture_filename_stream << texture_filename.c_str();
+	std::wstring texture_filename_narrow = texture_filename_stream.str();
+
+	DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow.c_str(), &texResource, &m_DiffuseMapSRV));
 
 	m_IsLoaded = true;
 	return true;
