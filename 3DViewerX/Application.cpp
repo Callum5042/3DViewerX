@@ -24,7 +24,7 @@ bool Application::OnInitialise()
 	ImGui_ImplSDL2_InitForD3D(GetWindow()->GetWindow());
 	ImGui_ImplDX11_Init(m_Renderer->GetDevice(), m_Renderer->GetDeviceContext());
 
-
+	m_Camera = new Camera();
 	m_Model = new Model(m_Renderer);
 
 
@@ -112,6 +112,11 @@ void Application::OnUpdate()
 	}
 
 	ImGui::End();
+
+	if (m_Camera != nullptr)
+	{
+		m_Camera->Update();
+	}
 
 	if (m_Model->IsLoaded())
 	{

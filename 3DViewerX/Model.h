@@ -6,7 +6,6 @@
 #include <vector>
 #include "WindowEvents.h"
 #include <string>
-using namespace DirectX;
 
 struct SimpleVertex
 {
@@ -37,13 +36,8 @@ public:
 
 	constexpr bool IsLoaded() { return m_IsLoaded; };
 
-	// Window Events
-	void OnResize(int width, int height) override;
-
 private:
-	XMMATRIX m_World;
-	XMMATRIX m_View;
-	XMMATRIX m_Projection;
+	DirectX::XMMATRIX m_World;
 
 	ID3D11Buffer* m_ConstantBuffer = nullptr;
 

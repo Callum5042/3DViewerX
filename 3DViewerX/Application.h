@@ -3,8 +3,9 @@
 #include "Engine.h"
 #include "WindowEvents.h"
 
-#include "Model.h"
 #include "Renderer.h"
+#include "Camera.h"
+#include "Model.h"
 
 class Application : public Engine, public Events::WindowListener
 {
@@ -19,7 +20,10 @@ public:
 	void OnQuit() override;
 	void OnResize(int width, int height) override;
 
+	constexpr Camera* GetCamera() { return m_Camera; }
+
 private:
 	Renderer* m_Renderer = nullptr;
+	Camera* m_Camera = nullptr;
 	Model* m_Model = nullptr;
 };

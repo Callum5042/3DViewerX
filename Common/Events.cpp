@@ -68,25 +68,24 @@ namespace
 				break;
 			}
 
-			/*case SDL_MOUSEWHEEL:
+			case SDL_MOUSEWHEEL:
 			{
-				auto mouseEvent = new Rove::Events::MouseWheelEvent();
+				auto mouseEvent = new Events::MouseWheelEvent();
 
 				if (e.wheel.y > 0)
 				{
-					mouseEvent->wheel = Rove::MouseWheel::WHEEL_UP;
+					mouseEvent->wheel = MouseWheel::WHEEL_UP;
 				}
 				else if (e.wheel.y < 0)
 				{
-					mouseEvent->wheel = Rove::MouseWheel::WHEEL_DOWN;
+					mouseEvent->wheel = MouseWheel::WHEEL_DOWN;
 				}
 
 				dispatcher->AddEvent(mouseEvent);
-
 				break;
 			}
 
-			case SDL_MOUSEMOTION:
+			/*case SDL_MOUSEMOTION:
 			{
 				auto mouseEvent = new Rove::Events::MouseMotionEvent();
 				mouseEvent->data.button = static_cast<Rove::MouseButton>(e.motion.state);

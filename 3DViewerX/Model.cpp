@@ -18,32 +18,42 @@
 #include <codecvt>
 #include <string>
 
-std::string textype;
-std::string determineTextureType(const aiScene* scene, aiMaterial* mat) 
-{
-	aiString textypeStr;
-	mat->GetTexture(aiTextureType_DIFFUSE, 0, &textypeStr);
-	std::string textypeteststr = textypeStr.C_Str();
-	if (textypeteststr == "*0" || textypeteststr == "*1" || textypeteststr == "*2" || textypeteststr == "*3" || textypeteststr == "*4" || textypeteststr == "*5") {
-		if (scene->mTextures[0]->mHeight == 0) {
-			return "embedded compressed texture";
-		}
-		else {
-			return "embedded non-compressed texture";
-		}
-	}
-	if (textypeteststr.find('.') != std::string::npos) {
-		return "textures are on disk";
-	}
+#include "Application.h"
 
-	return ".";
+namespace
+{
+	std::string textype;
+	std::string determineTextureType(const aiScene* scene, aiMaterial* mat)
+	{
+		aiString textypeStr;
+		mat->GetTexture(aiTextureType_DIFFUSE, 0, &textypeStr);
+		std::string textypeteststr = textypeStr.C_Str();
+		if (textypeteststr == "*0" || textypeteststr == "*1" || textypeteststr == "*2" || textypeteststr == "*3" || textypeteststr == "*4" || textypeteststr == "*5")
+		{
+			if (scene->mTextures[0]->mHeight == 0)
+			{
+				return "embedded compressed texture";
+			}
+			else
+			{
+				return "embedded non-compressed texture";
+			}
+		}
+
+		if (textypeteststr.find('.') != std::string::npos)
+		{
+			return "textures are on disk";
+		}
+
+		return ".";
+	}
 }
 
 struct ConstantBuffer
 {
-	XMMATRIX mWorld;
-	XMMATRIX mView;
-	XMMATRIX mProjection;
+	DirectX::XMMATRIX mWorld;
+	DirectX::XMMATRIX mView;
+	DirectX::XMMATRIX mProjection;
 };
 
 Model::Model(Renderer* renderer) : m_Renderer(renderer)
@@ -189,19 +199,7 @@ bool Model::Load(std::string&& filename)
 	}
 
 	// Perspective View
-	m_World = XMMatrixIdentity();
-
-	XMVECTOR eye = XMVectorSet(0.0f, 0.0f, -4.0f, 0.0f);
-	XMVECTOR at = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	m_View = XMMatrixLookAtLH(eye, at, up);
-
-	MainWindow* window = Engine::GetInstance()->GetWindow();
-
-	// Create the projection matrix for 3D rendering.
-	float fieldOfView = 85 * DirectX::XM_PI / 180;
-	float screenAspect = static_cast<float>(window->GetWidth()) / static_cast<float>(window->GetHeight());
-	m_Projection = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.01f, 100.0f);
+	m_World = DirectX::XMMatrixIdentity();
 
 	// Texture
 	if (!texture_filename.empty())
@@ -251,20 +249,26 @@ void Model::Update()
 
 	ImGui::Checkbox("Wireframe", &m_Wireframe);
 
-	m_World = XMMatrixRotationX(DirectX::XMConvertToRadians(m_AxisX));
-	m_World *= XMMatrixRotationY(DirectX::XMConvertToRadians(m_AxisY));
-	m_World *= XMMatrixRotationZ(DirectX::XMConvertToRadians(m_AxisZ));
+	m_World = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_AxisX));
+	m_World *= DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_AxisY));
+	m_World *= DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_AxisZ));
 
 	ImGui::End();
 }
 
 void Model::Render()
 {
+	Application* app = reinterpret_cast<Application*>(Application::GetInstance());
+	Camera* camera = app->GetCamera();
+
+	DirectX::XMMATRIX view = camera->GetView();
+	DirectX::XMMATRIX projection = camera->GetProjection();
+
 	// Shader thing
 	ConstantBuffer cb;
 	cb.mWorld = XMMatrixTranspose(m_World);
-	cb.mView = XMMatrixTranspose(m_View);
-	cb.mProjection = XMMatrixTranspose(m_Projection);
+	cb.mView = DirectX::XMMatrixTranspose(view);
+	cb.mProjection = DirectX::XMMatrixTranspose(projection);
 
 	m_Renderer->GetDeviceContext()->VSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 	m_Renderer->GetDeviceContext()->PSSetConstantBuffers(0, 1, &m_ConstantBuffer);
@@ -277,13 +281,6 @@ void Model::Render()
 	// Render triangle
 	m_Renderer->GetDeviceContext()->DrawIndexed(static_cast<UINT>(m_Indices.size()), 0, 0);
 }
-
-void Model::OnResize(int width, int height)
-{
-	float fieldOfView = 85 * DirectX::XM_PI / 180;
-	float screenAspect = static_cast<float>(width) / static_cast<float>(height);
-	m_Projection = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.01f, 100.0f);
-} 
 
 void Model::SetRasterState()
 {
