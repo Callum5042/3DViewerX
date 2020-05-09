@@ -204,13 +204,15 @@ bool Model::Load(std::string&& filename)
 	m_Projection = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.01f, 100.0f);
 
 	// Texture
-	ID3D11Resource* texResource = nullptr;
+	if (!texture_filename.empty())
+	{
+		ID3D11Resource* texResource = nullptr;
+		std::wstringstream texture_filename_stream;
+		texture_filename_stream << texture_filename.c_str();
+		std::wstring texture_filename_narrow = texture_filename_stream.str();
 
-	std::wstringstream texture_filename_stream;
-	texture_filename_stream << texture_filename.c_str();
-	std::wstring texture_filename_narrow = texture_filename_stream.str();
-
-	DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow.c_str(), &texResource, &m_DiffuseMapSRV));
+		DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow.c_str(), &texResource, &m_DiffuseMapSRV));
+	}
 
 	m_IsLoaded = true;
 	return true;
