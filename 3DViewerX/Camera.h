@@ -26,4 +26,6 @@ private:
 	DirectX::XMMATRIX m_Projection;
 
 	float m_Distance = -4;
+	float m_PosX = 0;
+	float m_POV = 85.0f;
 };

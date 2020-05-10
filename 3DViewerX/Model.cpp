@@ -14,10 +14,6 @@
 #include "MainWindow.h"
 #include <sstream>
 
-#include <locale>
-#include <codecvt>
-#include <string>
-
 #include "Application.h"
 
 namespace
@@ -237,7 +233,6 @@ void Model::Unload()
 void Model::Update()
 {
 	ImGui::Begin("Model");
-	ImGui::SetNextWindowSize(ImVec2(200, 200));
 
 	ImGui::Text("Name: %s", m_Name.c_str());
 	ImGui::Text("Vertices: %i", m_Vertices.size());
