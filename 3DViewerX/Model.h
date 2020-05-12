@@ -23,6 +23,15 @@ struct SimpleVertex
 	float v = 0;
 };
 
+struct Mesh
+{
+	std::vector<SimpleVertex> vertices;
+	std::vector<WORD> indices;
+
+	int startIndex = 0;
+	int startVertex = 0;
+};
+
 class Model : public Events::WindowListener
 {
 public:
@@ -51,8 +60,9 @@ private:
 
 	Renderer* m_Renderer = nullptr;
 
-	std::vector<SimpleVertex> m_Vertices;
-	std::vector<WORD> m_Indices;
+	std::vector<Mesh*> m_Meshes;
+	/*std::vector<SimpleVertex> m_Vertices;
+	std::vector<WORD> m_Indices;*/
 
 	ID3D11ShaderResourceView* m_DiffuseMapSRV;
 

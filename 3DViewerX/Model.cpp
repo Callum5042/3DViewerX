@@ -77,6 +77,8 @@ bool Model::Load(std::string&& filename)
 
 		m_Name = mesh->mName.C_Str();
 
+		Mesh* obj_mesh = new Mesh();
+
 		//Iterate over the vertices of the mesh
 		for (unsigned int j = 0; j < mesh->mNumVertices; ++j)
 		{
@@ -98,7 +100,7 @@ bool Model::Load(std::string&& filename)
 			}
 
 			//Add the vertex to the vertices vector
-			m_Vertices.push_back(vertex);
+			obj_mesh->vertices.push_back(vertex);
 		}
 
 		//Iterate over the faces of the mesh
@@ -110,7 +112,7 @@ bool Model::Load(std::string&& filename)
 			//Add the indices of the face to the vector
 			for (unsigned int k = 0; k < face.mNumIndices; ++k) 
 			{ 
-				m_Indices.push_back(face.mIndices[k]); 
+				obj_mesh->indices.push_back(face.mIndices[k]);
 			}
 		}
 
@@ -134,18 +136,39 @@ bool Model::Load(std::string&& filename)
 				std::cout << texture_filename << '\n';
 			}
 		}
+
+		if (!m_Meshes.empty())
+		{
+			Mesh* lastMesh = m_Meshes.back();
+			if (lastMesh != nullptr)
+			{
+				obj_mesh->startIndex = lastMesh->startIndex + lastMesh->indices.size();
+				obj_mesh->startVertex = lastMesh->startVertex + lastMesh->vertices.size();
+			}
+		}
+
+		m_Meshes.push_back(obj_mesh);
+	}
+
+	std::vector<SimpleVertex> vertices;
+	std::vector<WORD> indices;
+
+	for (auto& mesh : m_Meshes)
+	{
+		vertices.insert(vertices.end(), mesh->vertices.begin(), mesh->vertices.end());
+		indices.insert(indices.end(), mesh->indices.begin(), mesh->indices.end());
 	}
 
 	// Vertex duffer description
 	D3D11_BUFFER_DESC vbd = {};
 	vbd.Usage = D3D11_USAGE_DEFAULT;
-	vbd.ByteWidth = sizeof(SimpleVertex) * static_cast<UINT>(m_Vertices.size());
+	vbd.ByteWidth = sizeof(SimpleVertex) * static_cast<UINT>(vertices.size());
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA vInitData = {};
 
-	const SimpleVertex* vert = &m_Vertices[0];
+	const SimpleVertex* vert = &vertices[0];
 	vInitData.pSysMem = vert;
 
 	ID3D11Buffer* vertexBuffer = nullptr;
@@ -162,12 +185,12 @@ bool Model::Load(std::string&& filename)
 	// Index buffer description
 	D3D11_BUFFER_DESC ibd = {};
 	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.ByteWidth = sizeof(WORD) * static_cast<UINT>(m_Indices.size());
+	ibd.ByteWidth = sizeof(WORD) * static_cast<UINT>(indices.size());
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA iInitData = {};
-	const WORD* index = &m_Indices[0];
+	const WORD* index = &indices[0];
 	iInitData.pSysMem = index;
 
 	ID3D11Buffer* indexBuffer = nullptr;
@@ -214,15 +237,22 @@ bool Model::Load(std::string&& filename)
 
 void Model::Unload()
 {
-	m_Vertices.clear();
-	m_Indices.clear();
+	for (auto& mesh : m_Meshes)
+	{
+		delete mesh;
+	}
+
+	m_Meshes.clear();
 
 	m_AxisX = 0.0f;
 	m_AxisY = 0.0f;
 	m_AxisZ = 0.0f;
 
-	m_DiffuseMapSRV->Release();
-	m_DiffuseMapSRV = nullptr;
+	if (m_DiffuseMapSRV != nullptr)
+	{
+		m_DiffuseMapSRV->Release();
+		m_DiffuseMapSRV = nullptr;
+	}
 
 	m_ConstantBuffer->Release();
 	m_ConstantBuffer = nullptr;
@@ -235,7 +265,7 @@ void Model::Update()
 	ImGui::Begin("Model");
 
 	ImGui::Text("Name: %s", m_Name.c_str());
-	ImGui::Text("Vertices: %i", m_Vertices.size());
+	//ImGui::Text("Vertices: %i", m_Vertices.size());
 
 	ImGui::Text("Rotation");
 	ImGui::SliderFloat("X-Axis", &m_AxisX, 0.0f, 360.0f);
@@ -274,7 +304,12 @@ void Model::Render()
 	SetRasterState();
 
 	// Render triangle
-	m_Renderer->GetDeviceContext()->DrawIndexed(static_cast<UINT>(m_Indices.size()), 0, 0);
+	//m_Renderer->GetDeviceContext()->DrawIndexed(static_cast<UINT>(m_Indices.size()), 0, 0);
+
+	for (auto& mesh : m_Meshes)
+	{
+		m_Renderer->GetDeviceContext()->DrawIndexed(mesh->indices.size(), mesh->startIndex, mesh->startVertex);
+	}
 }
 
 void Model::SetRasterState()
