@@ -25,14 +25,10 @@ bool Application::OnInitialise()
 	ImGui_ImplSDL2_InitForD3D(GetWindow()->GetWindow());
 	ImGui_ImplDX11_Init(m_Renderer->GetDevice(), m_Renderer->GetDeviceContext());
 
+	m_Viewport = new Viewport(m_Renderer);
 	m_Camera = new Camera();
 	m_Model = new Model(m_Renderer);
 	m_Model->Load("C:\\Users\\Callum\\Desktop\\3d models\\cube\\cube.obj");
-
-	std::wstring path(L"C:\\Users\\Callum\\Desktop\\3d models\\cube_texture.dds");
-
-	ID3D11Resource* texResource = nullptr;
-	DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), path.c_str(), &texResource, &m_TextureMap));
 
 	return true; 
 }
@@ -119,29 +115,13 @@ void Application::OnUpdate()
 
 	ImGui::End();
 
-	if (m_Camera != nullptr)
-	{
-		m_Camera->Update();
-	}
+	m_Camera->Update();
+	m_Viewport->Update();
 
 	if (m_Model->IsLoaded())
 	{
 		m_Model->Update();
 	}
-
-	ImGui::Begin("Viewport");
-	ImVec2 pos = ImGui::GetCursorScreenPos();
-
-	ImVec2 size = ImGui::GetContentRegionAvail();
-	int w = (int)size.x;
-	int h = (int)size.y;
-
-	ID3D11ShaderResourceView* view = m_Renderer->GetTextureMap();
-	//ImGui::Image((void*)view, ImVec2(200, 200));
-	 ImGui::GetWindowDrawList()->AddImage((void*)view, pos, ImVec2(pos.x + w , pos.y + h));
-	//ImGui::GetWindowDrawList()->AddImage((void*)view, ImVec2(ImGui::GetItemRectMin().x + pos.x, ImGui::GetItemRectMin().y + pos.y), ImVec2(pos.x + h / 2, pos.y + w / 2), ImVec2(0, 1), ImVec2(1, 0));
-
-	ImGui::End();
 }
 
 void Application::OnRender()
@@ -149,14 +129,15 @@ void Application::OnRender()
 	m_Renderer->ClearScreen();
 
 	// Draw Viewport
-	m_Renderer->GetDeviceContext()->OMSetRenderTargets(1, &m_Renderer->m_TextureRenderTargetView, m_Renderer->m_TextureDepthStencilView);
+	
+	m_Viewport->Set();
 	if (m_Model->IsLoaded())
 	{
 		m_Model->Render();
 	}
 
 	// Draw GUI
-	m_Renderer->GetDeviceContext()->OMSetRenderTargets(1, &m_Renderer->m_RenderTargetView, m_Renderer->m_DepthStencilView);
+	m_Renderer->SetWindowTarget();
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 

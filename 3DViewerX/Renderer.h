@@ -13,17 +13,15 @@ public:
 	void ClearScreen();
 	void Render();
 	void Resize(int width, int height);
+	void ResizeViewport(int width, int height);
 
 	ID3D11Device* GetDevice() const { return m_Device; }
 	ID3D11DeviceContext* GetDeviceContext() const { return m_DeviceContext; }
 
 	ID3D11ShaderResourceView* GetTextureMap() { return m_TextureMap; }
 
-	ID3D11RenderTargetView* m_RenderTargetView = nullptr;
-	ID3D11RenderTargetView* m_TextureRenderTargetView = nullptr;
-
-	ID3D11DepthStencilView* m_DepthStencilView = nullptr;
-	ID3D11DepthStencilView* m_TextureDepthStencilView = nullptr;
+	void SetViewportTarget(int width, int height);
+	void SetWindowTarget();
 
 private:
 	ID3D11Device* m_Device = nullptr;
@@ -33,15 +31,22 @@ private:
 	ID3D11Texture2D* m_TextureDepthStencil = nullptr;
 	ID3D11Buffer* m_ConstantBuffer = nullptr;
 
+	ID3D11RenderTargetView* m_RenderTargetView = nullptr;
+	ID3D11RenderTargetView* m_TextureRenderTargetView = nullptr;
+
+	ID3D11DepthStencilView* m_DepthStencilView = nullptr;
+	ID3D11DepthStencilView* m_TextureDepthStencilView = nullptr;
+
 	ID3D11VertexShader* m_VertexShader = nullptr;
 	ID3D11PixelShader* m_PixelShader = nullptr;
 
 	bool CreateDevice();
 	bool CreateSwapChain();
 	bool CreateRenderTargetView();
+	bool CreateTextureRenderTargetView(int width, int height);
 	void SetViewport();
 
-	UINT m_4xMsaaQuality;
+	UINT m_4xMsaaQuality = 0;
 
 	bool CreateVertexShader(std::string&& vertexShaderPath);
 	bool CreatePixelShader(std::string&& pixelShaderPath);

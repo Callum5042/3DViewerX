@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "MainWindow.h"
+#include "Viewport.h"
 #include "Application.h"
 #include <imgui.h>
 #include <iostream>
@@ -11,8 +12,7 @@ Camera::Camera()
 	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	m_View = DirectX::XMMatrixLookAtLH(eye, at, up);
 
-	MainWindow* window = Engine::GetInstance()->GetWindow();
-	OnResize(window->GetWidth(), window->GetHeight());
+	Resize();
 }
 
 void Camera::Update()
@@ -21,19 +21,10 @@ void Camera::Update()
 
 	if (ImGui::SliderFloat("FOV", &m_POV, 0.0f, 360.0f))
 	{
-		MainWindow* window = Engine::GetInstance()->GetWindow();
-		OnResize(window->GetWidth(), window->GetHeight());
+		Resize();
 	}
 
 	ImGui::End();
-}
-
-void Camera::OnResize(int width, int height)
-{
-	// Create the projection matrix for 3D rendering.
-	float fieldOfView = m_POV * DirectX::XM_PI / 180;
-	float screenAspect = static_cast<float>(width) / static_cast<float>(height);
-	m_Projection = DirectX::XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.01f, 100.0f);
 }
 
 void Camera::OnKeyDown(Events::KeyData&& data)
@@ -69,4 +60,15 @@ void Camera::OnMouseWheel(Events::MouseWheelEvent* e)
 	DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	m_View = DirectX::XMMatrixLookAtLH(eye, at, up);
+}
+
+void Camera::Resize()
+{
+	Viewport* viewport = reinterpret_cast<Application*>(Engine::GetInstance())->GetViewport();
+	int width = viewport->GetWidth();
+	int height = viewport->GetHeight();
+
+	float fieldOfView = m_POV * DirectX::XM_PI / 180;
+	float screenAspect = static_cast<float>(width) / static_cast<float>(height);
+	m_Projection = DirectX::XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.01f, 100.0f);
 }
