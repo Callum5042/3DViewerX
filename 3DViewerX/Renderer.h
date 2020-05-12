@@ -30,7 +30,7 @@ private:
 	ID3D11DeviceContext* m_DeviceContext = nullptr;
 	IDXGISwapChain* m_SwapChain = nullptr;
 	ID3D11Texture2D* m_DepthStencil = nullptr;
-	ID3D11Texture2D* m_DepthStencil1 = nullptr;
+	ID3D11Texture2D* m_TextureDepthStencil = nullptr;
 	ID3D11Buffer* m_ConstantBuffer = nullptr;
 
 	ID3D11VertexShader* m_VertexShader = nullptr;

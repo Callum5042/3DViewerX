@@ -149,7 +149,7 @@ void Application::OnRender()
 	m_Renderer->ClearScreen();
 
 	// Draw Viewport
-	m_Renderer->GetDeviceContext()->OMSetRenderTargets(1, &m_Renderer->m_TextureRenderTargetView, nullptr);
+	m_Renderer->GetDeviceContext()->OMSetRenderTargets(1, &m_Renderer->m_TextureRenderTargetView, m_Renderer->m_TextureDepthStencilView);
 	if (m_Model->IsLoaded())
 	{
 		m_Model->Render();
