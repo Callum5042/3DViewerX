@@ -26,4 +26,7 @@ private:
 	Renderer* m_Renderer = nullptr;
 	Camera* m_Camera = nullptr;
 	Model* m_Model = nullptr;
+
+	ID3D11Texture2D* m_Texture = nullptr;
+	ID3D11ShaderResourceView* m_TextureMap = nullptr;
 };

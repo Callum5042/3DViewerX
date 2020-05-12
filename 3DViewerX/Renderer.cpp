@@ -37,6 +37,9 @@ void Renderer::ClearScreen()
 	m_DeviceContext->ClearRenderTargetView(m_RenderTargetView, reinterpret_cast<const float*>(&Blue));
 	m_DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
+	m_DeviceContext->ClearRenderTargetView(m_TextureRenderTargetView, reinterpret_cast<const float*>(&Blue));
+	m_DeviceContext->ClearDepthStencilView(m_TextureDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
 	// Bind shaders
 	m_DeviceContext->VSSetShader(m_VertexShader, nullptr, 0);
 	m_DeviceContext->PSSetShader(m_PixelShader, nullptr, 0);
@@ -136,7 +139,71 @@ bool Renderer::CreateSwapChain()
 
 bool Renderer::CreateRenderTargetView()
 {
-	// Render target view
+	D3D11_TEXTURE2D_DESC texDesc;
+	texDesc.Width = 800;
+	texDesc.Height = 600;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.MiscFlags = 0;
+
+	DX::ThrowIfFailed(m_Device->CreateTexture2D(&texDesc, 0, &m_Texture));
+
+	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+	renderTargetViewDesc.Format = texDesc.Format;
+	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.Texture2D.MipSlice = 0;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+	shaderResourceViewDesc.Format = texDesc.Format;
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+	// Depth stencil view
+	D3D11_TEXTURE2D_DESC descDepth1;
+	ZeroMemory(&descDepth1, sizeof(descDepth1));
+	descDepth1.Width = m_MainWindow->GetWidth();
+	descDepth1.Height = m_MainWindow->GetHeight();
+	descDepth1.MipLevels = 1;
+	descDepth1.ArraySize = 1;
+	descDepth1.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	descDepth1.SampleDesc.Count = 4;
+	descDepth1.SampleDesc.Quality = m_4xMsaaQuality - 1;
+	descDepth1.Usage = D3D11_USAGE_DEFAULT;
+	descDepth1.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	descDepth1.CPUAccessFlags = 0;
+	descDepth1.MiscFlags = 0;
+	DX::ThrowIfFailed(m_Device->CreateTexture2D(&descDepth1, nullptr, &m_DepthStencil1));
+	if (m_DepthStencil1 == nullptr)
+	{
+		return false;
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV1;
+	ZeroMemory(&descDSV1, sizeof(descDSV1));
+	descDSV1.Format = descDepth1.Format;
+	descDSV1.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+	descDSV1.Texture2D.MipSlice = 0;
+	DX::ThrowIfFailed(m_Device->CreateDepthStencilView(m_DepthStencil1, &descDSV1, &m_TextureDepthStencilView));
+	// Create the render target view.
+	//DX::ThrowIfFailed(m_Device->CreateRenderTargetView(m_Texture, &re&renderTargetViewDescm_TextureRenderTargetView));
+	DX::ThrowIfFailed(m_Device->CreateRenderTargetView(m_Texture, &renderTargetViewDesc, &m_TextureRenderTargetView));
+
+	// Create the shader resource view.
+	DX::ThrowIfFailed(m_Device->CreateShaderResourceView(m_Texture, &shaderResourceViewDesc, &m_TextureMap));
+
+	
+
+	///////////////////////////////////////////////
+	///////////// Back Buffer /////////////////////
+	///////////////////////////////////////////////
+// Render target view
 	ID3D11Resource* backBuffer = nullptr;
 	DX::ThrowIfFailed(m_SwapChain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&backBuffer)));
 	if (backBuffer == nullptr)
@@ -174,7 +241,7 @@ bool Renderer::CreateRenderTargetView()
 	descDSV.Texture2D.MipSlice = 0;
 	DX::ThrowIfFailed(m_Device->CreateDepthStencilView(m_DepthStencil, &descDSV, &m_DepthStencilView));
 
-	m_DeviceContext->OMSetRenderTargets(1, &m_RenderTargetView, m_DepthStencilView);
+	// m_DeviceContext->OMSetRenderTargets(1, &m_RenderTargetView, m_DepthStencilView);
 	return true;
 }
 

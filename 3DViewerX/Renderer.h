@@ -17,13 +17,20 @@ public:
 	ID3D11Device* GetDevice() const { return m_Device; }
 	ID3D11DeviceContext* GetDeviceContext() const { return m_DeviceContext; }
 
+	ID3D11ShaderResourceView* GetTextureMap() { return m_TextureMap; }
+
+	ID3D11RenderTargetView* m_RenderTargetView = nullptr;
+	ID3D11RenderTargetView* m_TextureRenderTargetView = nullptr;
+
+	ID3D11DepthStencilView* m_DepthStencilView = nullptr;
+	ID3D11DepthStencilView* m_TextureDepthStencilView = nullptr;
+
 private:
 	ID3D11Device* m_Device = nullptr;
 	ID3D11DeviceContext* m_DeviceContext = nullptr;
 	IDXGISwapChain* m_SwapChain = nullptr;
 	ID3D11Texture2D* m_DepthStencil = nullptr;
-	ID3D11RenderTargetView* m_RenderTargetView = nullptr;
-	ID3D11DepthStencilView* m_DepthStencilView = nullptr;
+	ID3D11Texture2D* m_DepthStencil1 = nullptr;
 	ID3D11Buffer* m_ConstantBuffer = nullptr;
 
 	ID3D11VertexShader* m_VertexShader = nullptr;
@@ -43,6 +50,9 @@ private:
 	HWND GetHwnd() const;
 
 	MainWindow* m_MainWindow = nullptr;
+
+	ID3D11Texture2D* m_Texture = nullptr;
+	ID3D11ShaderResourceView* m_TextureMap = nullptr;
 };
 
 namespace DX
