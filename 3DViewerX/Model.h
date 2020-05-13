@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include <vector>
 #include "WindowEvents.h"
+#include "InputEvents.h"
 #include <string>
 
 struct SimpleVertex
@@ -32,7 +33,7 @@ struct Mesh
 	int startVertex = 0;
 };
 
-class Model : public Events::WindowListener
+class Model : public Events::WindowListener, public Events::InputListener
 {
 public:
 	Model(Renderer* renderer);
@@ -44,6 +45,9 @@ public:
 	void Render();
 
 	constexpr bool IsLoaded() { return m_IsLoaded; };
+
+	// Mouse events
+	void OnMouseMotion(MouseData&& data) override;
 
 private:
 	DirectX::XMMATRIX m_World;

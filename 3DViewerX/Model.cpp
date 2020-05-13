@@ -16,6 +16,8 @@
 
 #include "Application.h"
 
+#include <iostream>
+
 namespace
 {
 	std::string textype;
@@ -304,11 +306,42 @@ void Model::Render()
 	SetRasterState();
 
 	// Render triangle
-	//m_Renderer->GetDeviceContext()->DrawIndexed(static_cast<UINT>(m_Indices.size()), 0, 0);
-
 	for (auto& mesh : m_Meshes)
 	{
 		m_Renderer->GetDeviceContext()->DrawIndexed(mesh->indices.size(), mesh->startIndex, mesh->startVertex);
+	}
+}
+
+void Model::OnMouseMotion(MouseData&& data)
+{
+	if (data.button == MouseButton::MOUSE_LMASK)
+	{
+		Viewport* viewport = reinterpret_cast<Application*>(Application::GetInstance()->GetInstance())->GetViewport();
+		if (viewport->IsFocused())
+		{
+			m_AxisY += (data.xrel * 0.25f);
+			m_AxisX += (data.yrel * 0.25f);
+
+			// Make sure it stays between 0-360
+			if (m_AxisX > 360)
+			{
+				m_AxisX = (static_cast<int>(m_AxisX) - 360);
+			}
+			else if (m_AxisX < 0)
+			{
+				m_AxisX = (static_cast<int>(m_AxisX) + 360);
+			}
+
+			// Make sure it stays between 0-360
+			if (m_AxisY > 360)
+			{
+				m_AxisY = (static_cast<int>(m_AxisY) - 360);
+			}
+			else if (m_AxisY < 0)
+			{
+				m_AxisY = (static_cast<int>(m_AxisY) + 360);
+			}
+		}
 	}
 }
 

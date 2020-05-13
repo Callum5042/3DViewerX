@@ -85,10 +85,10 @@ namespace
 				break;
 			}
 
-			/*case SDL_MOUSEMOTION:
+			case SDL_MOUSEMOTION:
 			{
-				auto mouseEvent = new Rove::Events::MouseMotionEvent();
-				mouseEvent->data.button = static_cast<Rove::MouseButton>(e.motion.state);
+				auto mouseEvent = new Events::MouseMotionEvent();
+				mouseEvent->data.button = static_cast<MouseButton>(e.motion.state);
 				mouseEvent->data.x = e.motion.x;
 				mouseEvent->data.y = e.motion.y;
 				mouseEvent->data.xrel = e.motion.xrel;
@@ -96,7 +96,7 @@ namespace
 
 				dispatcher->AddEvent(mouseEvent);
 				break;
-			}*/
+			}
 			}
 		}
 	}

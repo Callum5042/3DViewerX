@@ -20,7 +20,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::Create(std::string&& title, int width, int height)
 {
-	m_WindowHandle = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+	m_WindowHandle = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 	if (m_WindowHandle == nullptr)
 	{
 		return false;

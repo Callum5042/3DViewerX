@@ -23,7 +23,7 @@ private:
 
 	float m_Distance = -4;
 	float m_PosX = 0;
-	float m_POV = 85.0f;
+	float m_FOV = 85.0f;
 
 	void Resize();
 };

@@ -25,6 +25,8 @@ bool Application::OnInitialise()
 	ImGui_ImplSDL2_InitForD3D(GetWindow()->GetWindow());
 	ImGui_ImplDX11_Init(m_Renderer->GetDevice(), m_Renderer->GetDeviceContext());
 
+	ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
+
 	m_Viewport = new Viewport(m_Renderer);
 	m_Camera = new Camera();
 	m_Model = new Model(m_Renderer);
