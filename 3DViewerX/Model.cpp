@@ -72,14 +72,15 @@ bool Model::Load(std::string&& filename)
 		return false;
 	}
 
+	m_Name = filename;
+
 	for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
 	{
 		//Get the mesh
 		aiMesh* mesh = scene->mMeshes[i];
 
-		m_Name = mesh->mName.C_Str();
-
 		Mesh* obj_mesh = new Mesh();
+		obj_mesh->name = mesh->mName.C_Str();
 
 		//Iterate over the vertices of the mesh
 		for (unsigned int j = 0; j < mesh->mNumVertices; ++j)
@@ -144,8 +145,8 @@ bool Model::Load(std::string&& filename)
 			Mesh* lastMesh = m_Meshes.back();
 			if (lastMesh != nullptr)
 			{
-				obj_mesh->startIndex = lastMesh->startIndex + lastMesh->indices.size();
-				obj_mesh->startVertex = lastMesh->startVertex + lastMesh->vertices.size();
+				obj_mesh->startIndex = lastMesh->startIndex + (WORD)lastMesh->indices.size();
+				obj_mesh->startVertex = lastMesh->startVertex + (WORD)lastMesh->vertices.size();
 			}
 		}
 
@@ -267,7 +268,6 @@ void Model::Update()
 	ImGui::Begin("Model");
 
 	ImGui::Text("Name: %s", m_Name.c_str());
-	//ImGui::Text("Vertices: %i", m_Vertices.size());
 
 	ImGui::Text("Rotation");
 	ImGui::SliderFloat("X-Axis", &m_AxisX, 0.0f, 360.0f);
@@ -279,6 +279,13 @@ void Model::Update()
 	m_World = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_AxisX));
 	m_World *= DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_AxisY));
 	m_World *= DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_AxisZ));
+
+	for (auto& mesh : m_Meshes)
+	{
+		ImGui::Text("Name: %s", mesh->name.c_str());
+		ImGui::Text("Vertices: %i", mesh->vertices.size());
+		ImGui::Text("Indices: %i", mesh->indices.size());
+	}
 
 	ImGui::End();
 }
@@ -308,7 +315,7 @@ void Model::Render()
 	// Render triangle
 	for (auto& mesh : m_Meshes)
 	{
-		m_Renderer->GetDeviceContext()->DrawIndexed(mesh->indices.size(), mesh->startIndex, mesh->startVertex);
+		m_Renderer->GetDeviceContext()->DrawIndexed((UINT)mesh->indices.size(), (UINT)mesh->startIndex, mesh->startVertex);
 	}
 }
 
@@ -325,21 +332,21 @@ void Model::OnMouseMotion(MouseData&& data)
 			// Make sure it stays between 0-360
 			if (m_AxisX > 360)
 			{
-				m_AxisX = (static_cast<int>(m_AxisX) - 360);
+				m_AxisX = m_AxisX - 360.0f;
 			}
 			else if (m_AxisX < 0)
 			{
-				m_AxisX = (static_cast<int>(m_AxisX) + 360);
+				m_AxisX = m_AxisX + 360.0f;
 			}
 
 			// Make sure it stays between 0-360
 			if (m_AxisY > 360)
 			{
-				m_AxisY = (static_cast<int>(m_AxisY) - 360);
+				m_AxisY = m_AxisY - 360.0f;
 			}
 			else if (m_AxisY < 0)
 			{
-				m_AxisY = (static_cast<int>(m_AxisY) + 360);
+				m_AxisY = m_AxisY + 360.0f;
 			}
 		}
 	}

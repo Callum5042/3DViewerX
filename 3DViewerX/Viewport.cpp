@@ -1,6 +1,7 @@
 #include "Viewport.h"
 #include <imgui.h>
 #include <iostream>
+
 Viewport::Viewport(Renderer* renderer) : m_Renderer(renderer)
 {
 }

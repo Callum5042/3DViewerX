@@ -31,6 +31,7 @@ struct Mesh
 
 	int startIndex = 0;
 	int startVertex = 0;
+	std::string name;
 };
 
 class Model : public Events::WindowListener, public Events::InputListener
@@ -65,8 +66,6 @@ private:
 	Renderer* m_Renderer = nullptr;
 
 	std::vector<Mesh*> m_Meshes;
-	/*std::vector<SimpleVertex> m_Vertices;
-	std::vector<WORD> m_Indices;*/
 
 	ID3D11ShaderResourceView* m_DiffuseMapSRV;
 
