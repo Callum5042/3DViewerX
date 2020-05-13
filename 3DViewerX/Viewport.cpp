@@ -22,6 +22,13 @@ void Viewport::Update()
 		m_Height = height;
 
 		m_Renderer->ResizeViewport(width, height);
+		m_IsViewportFocused = false;
+	}
+
+	if (m_WindowPosX != pos.x || m_WindowPosY != pos.y)
+	{
+		m_WindowPosX = pos.x;
+		m_WindowPosY = pos.y;
 
 		m_IsViewportFocused = false;
 	}

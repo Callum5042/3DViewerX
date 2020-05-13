@@ -72,8 +72,9 @@ void Application::OnUpdate()
 	ImGui_ImplSDL2_NewFrame(GetWindow()->GetWindow());
 	ImGui::NewFrame();
 
-	//bool demo;
+	bool demo = true;
 	//ImGui::ShowDemoWindow(&demo);
+	
 
 	// Model loader
 	ImGui::Begin("Load");
