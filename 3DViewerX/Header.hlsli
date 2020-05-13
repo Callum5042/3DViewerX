@@ -6,6 +6,11 @@ cbuffer ConstantBuffer : register(b0)
 	matrix Projection;
 }
 
+cbuffer LightBuffer : register(b1)
+{
+	float4 Direction;
+};
+
 struct VS_INPUT
 {
 	float3 PosL : POSITION;

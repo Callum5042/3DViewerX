@@ -125,6 +125,14 @@ void Application::OnUpdate()
 	{
 		m_Model->Update();
 	}
+
+	ImGui::Begin("Lighting");
+
+	ImGui::SliderFloat("X-Axis", &m_Renderer->m_LightDirX, -1.0f, 1.0f);
+	ImGui::SliderFloat("Y-Axis", &m_Renderer->m_LightDirY, -1.0f, 1.0f);
+	ImGui::SliderFloat("Z-Axis", &m_Renderer->m_LightDirZ, -1.0f, 1.0f);
+
+	ImGui::End();
 }
 
 void Application::OnRender()

@@ -307,7 +307,6 @@ void Model::Render()
 	m_Renderer->GetDeviceContext()->VSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 	m_Renderer->GetDeviceContext()->PSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 	m_Renderer->GetDeviceContext()->PSSetShaderResources(0, 1, &m_DiffuseMapSRV);
-
 	m_Renderer->GetDeviceContext()->UpdateSubresource(m_ConstantBuffer, 0, nullptr, &cb, 0, 0);
 
 	SetRasterState();

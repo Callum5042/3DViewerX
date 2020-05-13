@@ -23,6 +23,12 @@ public:
 	void SetViewportTarget(int width, int height);
 	void SetWindowTarget();
 
+
+	// Light direction
+	float m_LightDirX = 0.0f;
+	float m_LightDirY = 0.0f;
+	float m_LightDirZ = 0.0f;
+
 private:
 	ID3D11Device* m_Device = nullptr;
 	ID3D11DeviceContext* m_DeviceContext = nullptr;
@@ -30,6 +36,7 @@ private:
 	ID3D11Texture2D* m_DepthStencil = nullptr;
 	ID3D11Texture2D* m_TextureDepthStencil = nullptr;
 	ID3D11Buffer* m_ConstantBuffer = nullptr;
+	ID3D11Buffer* m_LightBuffer = nullptr;
 
 	ID3D11RenderTargetView* m_RenderTargetView = nullptr;
 	ID3D11RenderTargetView* m_TextureRenderTargetView = nullptr;

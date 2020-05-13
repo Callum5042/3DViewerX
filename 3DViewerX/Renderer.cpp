@@ -2,6 +2,12 @@
 #include <SDL_syswm.h>
 #include <fstream>
 #include <SDL_messagebox.h>
+#include <DirectXMath.h>
+
+struct LightBuffer
+{
+	DirectX::XMFLOAT4 mDirection;
+};
 
 Renderer::Renderer(MainWindow* mainWindow) : m_MainWindow(mainWindow)
 {
@@ -30,6 +36,19 @@ bool Renderer::Init()
 	if (!CreatePixelShader("D:\\Sources\\3DViewerX\\bin\\3DViewerX\\Debug-x64\\PixelShader.cso"))
 		return false;
 
+	// Light buffer
+	D3D11_BUFFER_DESC bd1 = {};
+	bd1.Usage = D3D11_USAGE_DEFAULT;
+	bd1.ByteWidth = sizeof(LightBuffer);
+	bd1.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd1.CPUAccessFlags = 0;
+	HRESULT hr = GetDevice()->CreateBuffer(&bd1, nullptr, &m_LightBuffer);
+	if (FAILED(hr))
+	{
+		// SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "CreateBuffer failed", nullptr);
+		return false;
+	}
+
 	return true;
 }
 
@@ -47,6 +66,14 @@ void Renderer::ClearScreen()
 	// Bind shaders
 	m_DeviceContext->VSSetShader(m_VertexShader, nullptr, 0);
 	m_DeviceContext->PSSetShader(m_PixelShader, nullptr, 0);
+
+	// Light ting
+	LightBuffer lb;
+	lb.mDirection = DirectX::XMFLOAT4(m_LightDirX, m_LightDirY, m_LightDirZ, 0.0f);
+
+	GetDeviceContext()->VSSetConstantBuffers(1, 1, &m_LightBuffer);
+	GetDeviceContext()->PSSetConstantBuffers(1, 1, &m_LightBuffer);
+	GetDeviceContext()->UpdateSubresource(m_LightBuffer, 0, nullptr, &lb, 0, 0);
 }
 
 void Renderer::Render()
@@ -109,9 +136,7 @@ bool Renderer::CreateDevice()
 		return false;
 	}
 
-
 	DX::ThrowIfFailed(m_Device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4, &m_4xMsaaQuality));
-
 	return true;
 }
 
