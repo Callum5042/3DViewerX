@@ -1,24 +1,6 @@
 
 #include "Header.hlsli"
 
-float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, float3 tangentW)
-{
-	// Uncompress each component from [0,1] to [-1,1].
-	float3 normalT = 2.0f * normalMapSample - 1.0f;
-
-	// Build orthonormal basis.
-	float3 N = unitNormalW;
-	float3 T = normalize(tangentW - dot(tangentW, N) * N);
-	float3 B = cross(N, T);
-
-	float3x3 TBN = float3x3(T, B, N);
-
-	// Transform from tangent space to world space.
-	float3 bumpedNormalW = mul(normalT, TBN);
-
-	return bumpedNormalW;
-}
-
 float4 main(PS_INPUT pin) : SV_TARGET
 {
 	// Interpolating normal can unnormalize it, so normalize it.
@@ -28,8 +10,6 @@ float4 main(PS_INPUT pin) : SV_TARGET
 	float4 diffuse = gDiffuseMap.Sample(samAnisotropic, pin.Tex);
 
 	// Normal mapping
-	// float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, pin.NormalW, pin.TangentW);
-
 	float3 normalMap = gNormalMap.Sample(samAnisotropic, pin.Tex).rgb;
 	normalMap = (2.0f * normalMap) - 1.0f;
 	pin.TangentW = normalize(pin.NormalW - dot(pin.TangentW, pin.NormalW) * pin.NormalW);

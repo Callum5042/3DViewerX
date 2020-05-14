@@ -72,14 +72,14 @@ void RenderDevice::SetRasterState()
 	D3D11_RASTERIZER_DESC rasterizerState;
 	ZeroMemory(&rasterizerState, sizeof(D3D11_RASTERIZER_DESC));
 
-	rasterizerState.AntialiasedLineEnable = false;
+	rasterizerState.AntialiasedLineEnable = true;
 	rasterizerState.CullMode = D3D11_CULL_NONE; // D3D11_CULL_FRONT or D3D11_CULL_NONE D3D11_CULL_BACK
 	rasterizerState.FillMode = D3D11_FILL_WIREFRAME; // D3D11_FILL_SOLID  D3D11_FILL_WIREFRAME
 	rasterizerState.DepthBias = 0;
 	rasterizerState.DepthBiasClamp = 0.0f;
 	rasterizerState.DepthClipEnable = true;
 	rasterizerState.FrontCounterClockwise = false;
-	rasterizerState.MultisampleEnable = false;
+	rasterizerState.MultisampleEnable = true;
 	rasterizerState.ScissorEnable = false;
 	rasterizerState.SlopeScaledDepthBias = 0.0f;
 
