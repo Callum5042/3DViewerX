@@ -20,6 +20,8 @@
 #include <filesystem>
 #include <assimp\postprocess.h>
 
+ID3D11SamplerState* g_Sampler = nullptr;
+
 namespace
 {
 	std::string textype;
@@ -261,6 +263,20 @@ bool Model::Load(std::string&& filename)
 		DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow1.c_str(), &texResource, &m_NormalMapSRV));
 	}
 
+	D3D11_SAMPLER_DESC samplerDesc;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0;
+	samplerDesc.MaxAnisotropy = 8;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	//anisotropicDesc.BorderColor = 0.0f;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = 0;
+
+	m_Renderer->GetDevice()->CreateSamplerState(&samplerDesc, &g_Sampler);
+
 	m_IsLoaded = true;
 	return true;
 }
@@ -332,8 +348,11 @@ void Model::Render()
 	cb.mProjection = DirectX::XMMatrixTranspose(projection);
 
 	m_Renderer->GetDeviceContext()->VSSetConstantBuffers(0, 1, &m_ConstantBuffer);
+
 	m_Renderer->GetDeviceContext()->PSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 	m_Renderer->GetDeviceContext()->PSSetShaderResources(0, 1, &m_DiffuseMapSRV);
+	m_Renderer->GetDeviceContext()->PSSetSamplers(0, 1, &g_Sampler);
+
 	m_Renderer->GetDeviceContext()->UpdateSubresource(m_ConstantBuffer, 0, nullptr, &cb, 0, 0);
 
 	SetRasterState();

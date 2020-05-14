@@ -31,11 +31,4 @@ struct PS_INPUT
 Texture2D gDiffuseMap : register(t0);
 Texture2D gNormalMap : register(t1);
 
-SamplerState samAnisotropic
-{
-	Filter = ANISOTROPIC;
-	MaxAnisotropy = 16;
-
-	AddressU = WRAP;
-	AddressV = WRAP;
-};
+SamplerState samAnisotropic : register(s0);
