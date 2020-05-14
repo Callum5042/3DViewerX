@@ -17,6 +17,7 @@
 #include "Application.h"
 
 #include <iostream>
+#include <filesystem>
 
 namespace
 {
@@ -226,9 +227,11 @@ bool Model::Load(std::string&& filename)
 	// Texture
 	if (!texture_filename.empty())
 	{
+		std::filesystem::path file_path = std::filesystem::path(filename).parent_path() /= std::filesystem::path(texture_filename);
+
 		ID3D11Resource* texResource = nullptr;
 		std::wstringstream texture_filename_stream;
-		texture_filename_stream << texture_filename.c_str();
+		texture_filename_stream << file_path.string().c_str();
 		std::wstring texture_filename_narrow = texture_filename_stream.str();
 
 		DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow.c_str(), &texResource, &m_DiffuseMapSRV));
