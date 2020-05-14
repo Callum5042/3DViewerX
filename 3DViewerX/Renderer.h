@@ -27,7 +27,7 @@ public:
 	// Light direction
 	float m_LightDirX = 0.0f;
 	float m_LightDirY = 0.0f;
-	float m_LightDirZ = 0.0f;
+	float m_LightDirZ = -0.6f;
 
 private:
 	ID3D11Device* m_Device = nullptr;

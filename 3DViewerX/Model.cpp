@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <filesystem>
+#include <assimp\postprocess.h>
 
 namespace
 {
@@ -61,11 +62,9 @@ Model::Model(Renderer* renderer) : m_Renderer(renderer)
 
 bool Model::Load(std::string&& filename)
 {
-	std::string texture_filename;
-
 	// Drawing
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -97,7 +96,14 @@ bool Model::Load(std::string&& filename)
 			vertex.ny = static_cast<float>(mesh->mNormals[j].y);
 			vertex.nz = static_cast<float>(mesh->mNormals[j].z);
 
-			if (mesh->mTextureCoords[0]) 
+			if (mesh->HasTangentsAndBitangents())
+			{
+				vertex.tx = mesh->mTangents[j].x;
+				vertex.ty = mesh->mTangents[j].y;
+				vertex.tz = mesh->mTangents[j].z;
+			}
+
+			if (mesh->mTextureCoords[0])
 			{
 				vertex.u = (float)mesh->mTextureCoords[0][j].x;
 				vertex.v = (float)mesh->mTextureCoords[0][j].y;
@@ -136,8 +142,18 @@ bool Model::Load(std::string&& filename)
 				aiString str;
 				material->GetTexture(type, i, &str);
 				
-				texture_filename = std::string(str.C_Str());
-				std::cout << texture_filename << '\n';
+				texture_diffuse = std::string(str.C_Str());
+				std::cout << texture_diffuse << '\n';
+			}
+
+			type = aiTextureType_HEIGHT;
+			for (UINT i = 0; i < material->GetTextureCount(type); i++) 
+			{
+				aiString str;
+				material->GetTexture(type, i, &str);
+				
+				texture_normal = std::string(str.C_Str());
+				std::cout << texture_normal << '\n';
 			}
 		}
 
@@ -225,16 +241,24 @@ bool Model::Load(std::string&& filename)
 	m_World = DirectX::XMMatrixIdentity();
 
 	// Texture
-	if (!texture_filename.empty())
+	if (!texture_diffuse.empty())
 	{
-		std::filesystem::path file_path = std::filesystem::path(filename).parent_path() /= std::filesystem::path(texture_filename);
+		std::filesystem::path diffuse_file_path = std::filesystem::path(filename).parent_path() /= std::filesystem::path(texture_diffuse);
+		std::filesystem::path normal_file_path = std::filesystem::path(filename).parent_path() /= std::filesystem::path(texture_normal);
 
 		ID3D11Resource* texResource = nullptr;
+
 		std::wstringstream texture_filename_stream;
-		texture_filename_stream << file_path.string().c_str();
+		texture_filename_stream << diffuse_file_path.string().c_str();
 		std::wstring texture_filename_narrow = texture_filename_stream.str();
 
 		DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow.c_str(), &texResource, &m_DiffuseMapSRV));
+		
+		std::wstringstream texture_filename_stream1;
+		texture_filename_stream1 << normal_file_path.string().c_str();
+		std::wstring texture_filename_narrow1 = texture_filename_stream1.str();
+
+		DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow1.c_str(), &texResource, &m_NormalMapSRV));
 	}
 
 	m_IsLoaded = true;
@@ -328,8 +352,8 @@ void Model::OnMouseMotion(MouseData&& data)
 		Viewport* viewport = reinterpret_cast<Application*>(Application::GetInstance()->GetInstance())->GetViewport();
 		if (viewport->IsFocused())
 		{
-			m_AxisY += (data.xrel * 0.25f);
-			m_AxisX += (data.yrel * 0.25f);
+			m_AxisY -= (data.xrel * 0.25f);
+			m_AxisX -= (data.yrel * 0.25f);
 
 			// Make sure it stays between 0-360
 			if (m_AxisX > 360)

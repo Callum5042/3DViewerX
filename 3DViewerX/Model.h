@@ -22,6 +22,10 @@ struct SimpleVertex
 
 	float u = 0;
 	float v = 0;
+
+	float tx = 0;
+	float ty = 0;
+	float tz = 0;
 };
 
 struct Mesh
@@ -68,8 +72,12 @@ private:
 	std::vector<Mesh*> m_Meshes;
 
 	ID3D11ShaderResourceView* m_DiffuseMapSRV;
+	ID3D11ShaderResourceView* m_NormalMapSRV;
 
 	bool m_IsLoaded = false;
 
 	std::string m_Name;
+
+	std::string texture_diffuse;
+	std::string texture_normal;
 };

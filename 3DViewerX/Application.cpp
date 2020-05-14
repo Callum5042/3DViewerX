@@ -30,7 +30,7 @@ bool Application::OnInitialise()
 	m_Viewport = new Viewport(m_Renderer);
 	m_Camera = new Camera();
 	m_Model = new Model(m_Renderer);
-	m_Model->Load("D:\\3d models\\cube_cone.obj");
+	m_Model->Load("D:\\3d models\\crate\\crate.obj");
 
 	return true; 
 }
