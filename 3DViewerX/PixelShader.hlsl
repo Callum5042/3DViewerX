@@ -30,7 +30,15 @@ float4 main(PS_INPUT pin) : SV_TARGET
 	if (UseDiffuseTexture)
 	{
 		float4 litColor = diffuse;
-		litColor += saturate(dot(-lightDir, pin.NormalW)) * diffuse;
+
+		if (UseNormalTexture)
+		{
+			litColor += saturate(dot(-lightDir, pin.NormalW)) * diffuse;
+		}
+		else
+		{
+			litColor += saturate(dot(lightDir, pin.NormalW)) * diffuse;
+		}
 
 		litColor.a = 1.0f;
 		return litColor;

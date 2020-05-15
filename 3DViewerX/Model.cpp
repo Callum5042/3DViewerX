@@ -342,6 +342,8 @@ void Model::Update()
 	ImGui::SliderFloat("Z-Axis", &m_AxisZ, 0.0f, 360.0f);
 
 	ImGui::Checkbox("Wireframe", &m_Wireframe);
+	ImGui::Checkbox("Diffuse Texture", &m_UseDiffuseTexture);
+	ImGui::Checkbox("Normal Texture", &m_UseNormalTexture);
 
 	m_World = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_AxisX));
 	m_World *= DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_AxisY));
