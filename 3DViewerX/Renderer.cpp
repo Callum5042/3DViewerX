@@ -4,7 +4,7 @@
 #include <SDL_messagebox.h>
 #include <DirectXMath.h>
 
-struct LightBuffer
+_declspec(align(16)) struct LightBuffer
 {
 	DirectX::XMFLOAT4 mDirection;
 };

@@ -19,6 +19,7 @@
 #include <iostream>
 #include <filesystem>
 #include <assimp\postprocess.h>
+#include <SDL_messagebox.h>
 
 ID3D11SamplerState* g_Sampler = nullptr;
 
@@ -51,11 +52,13 @@ namespace
 	}
 }
 
-struct ConstantBuffer
+_declspec(align(16)) struct ConstantBuffer
 {
 	DirectX::XMMATRIX mWorld;
 	DirectX::XMMATRIX mView;
 	DirectX::XMMATRIX mProjection;
+	int mUseDiffuseTexture;
+	int mUseNormalTexture;
 };
 
 Model::Model(Renderer* renderer) : m_Renderer(renderer)
@@ -235,7 +238,7 @@ bool Model::Load(std::string&& filename)
 	hr = m_Renderer->GetDevice()->CreateBuffer(&bd, nullptr, &m_ConstantBuffer);
 	if (FAILED(hr))
 	{
-		// SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "CreateBuffer failed", nullptr);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "CreateBuffer failed", nullptr);
 		return false;
 	}
 
@@ -250,17 +253,27 @@ bool Model::Load(std::string&& filename)
 
 		ID3D11Resource* texResource = nullptr;
 
-		std::wstringstream texture_filename_stream;
-		texture_filename_stream << diffuse_file_path.string().c_str();
-		std::wstring texture_filename_narrow = texture_filename_stream.str();
+		if (!diffuse_file_path.string().empty())
+		{
+			std::wstringstream texture_filename_stream;
+			texture_filename_stream << diffuse_file_path.string().c_str();
+			std::wstring texture_filename_narrow = texture_filename_stream.str();
 
-		DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow.c_str(), &texResource, &m_DiffuseMapSRV));
-		
-		std::wstringstream texture_filename_stream1;
-		texture_filename_stream1 << normal_file_path.string().c_str();
-		std::wstring texture_filename_narrow1 = texture_filename_stream1.str();
+			DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow.c_str(), &texResource, &m_DiffuseMapSRV));
 
-		DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow1.c_str(), &texResource, &m_NormalMapSRV));
+			m_UseDiffuseTexture = true;
+		}
+
+		if (!normal_file_path.string().empty())
+		{
+			std::wstringstream texture_filename_stream1;
+			texture_filename_stream1 << normal_file_path.string().c_str();
+			std::wstring texture_filename_narrow1 = texture_filename_stream1.str();
+
+			DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow1.c_str(), &texResource, &m_NormalMapSRV));
+
+			m_UseNormalTexture = true;
+		}
 	}
 
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -271,7 +284,6 @@ bool Model::Load(std::string&& filename)
 	samplerDesc.MipLODBias = 0;
 	samplerDesc.MaxAnisotropy = 8;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	//anisotropicDesc.BorderColor = 0.0f;
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = 0;
 
@@ -300,10 +312,22 @@ void Model::Unload()
 		m_DiffuseMapSRV = nullptr;
 	}
 
+	if (m_NormalMapSRV != nullptr)
+	{
+		m_NormalMapSRV->Release();
+		m_NormalMapSRV = nullptr;
+	}
+
 	m_ConstantBuffer->Release();
 	m_ConstantBuffer = nullptr;
 
 	m_IsLoaded = false;
+
+	texture_diffuse.clear();
+	texture_normal.clear();
+
+	m_UseDiffuseTexture = false;
+	m_UseNormalTexture = false;
 }
 
 void Model::Update()
@@ -346,6 +370,8 @@ void Model::Render()
 	cb.mWorld = XMMatrixTranspose(m_World);
 	cb.mView = DirectX::XMMatrixTranspose(view);
 	cb.mProjection = DirectX::XMMatrixTranspose(projection);
+	cb.mUseDiffuseTexture = m_UseDiffuseTexture;
+	cb.mUseNormalTexture = m_UseNormalTexture;
 
 	m_Renderer->GetDeviceContext()->VSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 

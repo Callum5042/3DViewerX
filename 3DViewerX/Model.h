@@ -80,4 +80,7 @@ private:
 
 	std::string texture_diffuse;
 	std::string texture_normal;
+
+	bool m_UseDiffuseTexture = false;
+	bool m_UseNormalTexture = false;
 };

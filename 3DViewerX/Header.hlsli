@@ -4,6 +4,8 @@ cbuffer ConstantBuffer : register(b0)
 	matrix World;
 	matrix View;
 	matrix Projection;
+	int UseDiffuseTexture;
+	int UseNormalTexture;
 }
 
 cbuffer LightBuffer : register(b1)
