@@ -21,9 +21,9 @@ private:
 	DirectX::XMMATRIX m_View;
 	DirectX::XMMATRIX m_Projection;
 
-	float m_Distance = -4;
+	float m_Distance = -20;
 	float m_PosX = 0;
-	float m_FOV = 50.0f;
+	float m_FOV = 85.0;
 
 	void Resize();
 };

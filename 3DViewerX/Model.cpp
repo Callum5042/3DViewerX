@@ -379,6 +379,8 @@ void Model::Render()
 
 	m_Renderer->GetDeviceContext()->PSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 	m_Renderer->GetDeviceContext()->PSSetShaderResources(0, 1, &m_DiffuseMapSRV);
+	m_Renderer->GetDeviceContext()->PSSetShaderResources(1, 1, &m_NormalMapSRV);
+
 	m_Renderer->GetDeviceContext()->PSSetSamplers(0, 1, &g_Sampler);
 
 	m_Renderer->GetDeviceContext()->UpdateSubresource(m_ConstantBuffer, 0, nullptr, &cb, 0, 0);

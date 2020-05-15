@@ -12,17 +12,34 @@ float4 main(PS_INPUT pin) : SV_TARGET
 	// Normal mapping
 	if (UseNormalTexture)
 	{
-		float3 normalMap = gNormalMap.Sample(samAnisotropic, pin.Tex).rgb;
-		normalMap = (2.0f * normalMap) - 1.0f;
-		pin.TangentW = normalize(pin.NormalW - dot(pin.TangentW, pin.NormalW) * pin.NormalW);
+		float3 normalMapSample = gNormalMap.Sample(samAnisotropic, pin.Tex).rgb;
 
-		//Create the biTangent
-		float3 biTangent = cross(pin.NormalW, pin.TangentW);
+		// Uncompress each component from [0,1] to [-1,1].
+		float3 normalT = 2.0f * normalMapSample - 1.0f;
 
-		//Create the "Texture Space"
-		float3x3 texSpace = float3x3(pin.TangentW, biTangent, pin.NormalW);
+		// Build orthonormal basis.
+		float3 N = pin.NormalW;
+		float3 T = normalize(pin.TangentW - dot(pin.TangentW, N) * N);
+		float3 B = cross(N, T);
 
-		pin.NormalW = normalize(mul(normalMap, texSpace));
+		float3x3 TBN = float3x3(T, B, N);
+
+		// Transform from tangent space to world space.
+		float3 bumpedNormalW = mul(normalT, TBN);
+
+		pin.NormalW = bumpedNormalW;
+
+		//float3 normalMap = gNormalMap.Sample(samAnisotropic, pin.Tex).rgb;
+		//normalMap = (2.0f * normalMap) - 1.0f;
+		//pin.TangentW = normalize(pin.NormalW - dot(pin.TangentW, pin.NormalW) * pin.NormalW);
+
+		////Create the biTangent
+		//float3 biTangent = cross(pin.NormalW, pin.TangentW);
+
+		////Create the "Texture Space"
+		//float3x3 texSpace = float3x3(pin.TangentW, biTangent, pin.NormalW);
+
+		//pin.NormalW = normalize(mul(normalMap, texSpace));
 	}
 
 	// Lighting
@@ -33,7 +50,7 @@ float4 main(PS_INPUT pin) : SV_TARGET
 
 		if (UseNormalTexture)
 		{
-			litColor += saturate(dot(-lightDir, pin.NormalW)) * diffuse;
+			litColor += saturate(dot(lightDir, pin.NormalW)) * diffuse;
 		}
 		else
 		{
