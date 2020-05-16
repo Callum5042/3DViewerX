@@ -19,7 +19,8 @@ float4 main(PS_INPUT pin) : SV_TARGET
 
 		// Build orthonormal basis.
 		float3 N = pin.NormalW;
-		float3 T = normalize(pin.TangentW - dot(pin.TangentW, N) * N);
+		// float3 T = normalize(pin.TangentW - dot(pin.TangentW, N) * N); //< This seems to fix the normal swap, but it feels wrong
+		float3 T = normalize(pin.NormalW - dot(pin.TangentW, N) * N);
 		float3 B = cross(N, T);
 
 		float3x3 TBN = float3x3(T, B, N);

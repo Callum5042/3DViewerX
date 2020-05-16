@@ -106,6 +106,10 @@ bool Model::Load(std::string&& filename)
 				vertex.tx = mesh->mTangents[j].x;
 				vertex.ty = mesh->mTangents[j].y;
 				vertex.tz = mesh->mTangents[j].z;
+
+				vertex.bx = mesh->mBitangents[j].x;
+				vertex.by = mesh->mBitangents[j].y;
+				vertex.bz = mesh->mBitangents[j].z;
 			}
 
 			if (mesh->mTextureCoords[0])
@@ -151,7 +155,18 @@ bool Model::Load(std::string&& filename)
 				std::cout << texture_diffuse << '\n';
 			}
 
+			// WAVEFRONT .OBJ maps the normal texture to the height for some reason
 			type = aiTextureType_HEIGHT;
+			for (UINT j = 0; j < material->GetTextureCount(type); j++) 
+			{
+				aiString str;
+				material->GetTexture(type, j, &str);
+				
+				texture_normal = std::string(str.C_Str());
+				std::cout << texture_normal << '\n';
+			}
+
+			type = aiTextureType_NORMALS;
 			for (UINT j = 0; j < material->GetTextureCount(type); j++) 
 			{
 				aiString str;
@@ -302,9 +317,9 @@ void Model::Unload()
 
 	m_Meshes.clear();
 
-	m_AxisX = 0.0f;
-	m_AxisY = 0.0f;
-	m_AxisZ = 0.0f;
+	m_Pitch = 0.0f;
+	m_Yaw = 0.0f;
+	m_Roll = 0.0f;
 
 	if (m_DiffuseMapSRV != nullptr)
 	{
@@ -332,30 +347,55 @@ void Model::Unload()
 
 void Model::Gui()
 {
-	ImGui::Text("Name: %s", m_Name.c_str());
-
-	ImGui::Text("Rotation");
-	ImGui::SliderFloat("X-Axis", &m_AxisX, 0.0f, 360.0f);
-	ImGui::SliderFloat("Y-Axis", &m_AxisY, 0.0f, 360.0f);
-	ImGui::SliderFloat("Z-Axis", &m_AxisZ, 0.0f, 360.0f);
-
-	ImGui::Checkbox("Wireframe", &m_Wireframe);
-	ImGui::Checkbox("Diffuse Texture", &m_UseDiffuseTexture);
-	ImGui::Checkbox("Normal Texture", &m_UseNormalTexture);
+	ImGui::Text("File: %s", m_Name.c_str());
+	ImGui::Separator();
 
 	for (auto& mesh : m_Meshes)
 	{
 		ImGui::Text("Name: %s", mesh->name.c_str());
 		ImGui::Text("Vertices: %i", mesh->vertices.size());
 		ImGui::Text("Indices: %i", mesh->indices.size());
+		ImGui::Separator();
 	}
+
+	ImGui::Text("Position");
+	ImGui::SliderFloat("Position X", &m_PositionX, -10.0f, 10.f);
+	ImGui::SliderFloat("Position Y", &m_PositionY, -10.0f, 10.f);
+	ImGui::SliderFloat("Position Z", &m_PositionZ, -10.0f, 10.f);
+	ImGui::Separator();
+
+	ImGui::Text("Rotation");
+	ImGui::SliderFloat("Rotate X", &m_Pitch, 0.0f, 360.0f);
+	ImGui::SliderFloat("Rotate Y", &m_Yaw, 0.0f, 360.0f);
+	ImGui::SliderFloat("Rotate Z", &m_Roll, 0.0f, 360.0f);
+	ImGui::Separator();
+
+	ImGui::Text("Scaling");
+	ImGui::SliderFloat("Scale X", &m_ScaleX, 0.0f, 10.0f);
+	ImGui::SliderFloat("Scale Y", &m_ScaleY, 0.0f, 10.0f);
+	ImGui::SliderFloat("Scale Z", &m_ScaleZ, 0.0f, 10.0f);
+	ImGui::Separator();
+
+	ImGui::Checkbox("Wireframe", &m_Wireframe);
+	ImGui::Checkbox("Diffuse Texture", &m_UseDiffuseTexture);
+	ImGui::Checkbox("Normal Texture", &m_UseNormalTexture);
 }
 
 void Model::Update()
 {
-	m_World = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_AxisX));
-	m_World *= DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_AxisY));
-	m_World *= DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_AxisZ));
+	m_World = DirectX::XMMatrixIdentity();
+
+	// Scale
+	m_World *= DirectX::XMMatrixScaling(m_ScaleX, m_ScaleY, m_ScaleZ);
+
+	// Rotation
+	float pitch = DirectX::XMConvertToRadians(m_Pitch);
+	float yaw = DirectX::XMConvertToRadians(m_Yaw);
+	float roll = DirectX::XMConvertToRadians(m_Roll);
+	m_World *= DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
+
+	// Translation
+	m_World *= DirectX::XMMatrixTranslation(m_PositionX, m_PositionY, m_PositionZ);
 }
 
 void Model::Render()
@@ -400,27 +440,27 @@ void Model::OnMouseMotion(MouseData&& data)
 		Viewport* viewport = reinterpret_cast<Application*>(Application::GetInstance()->GetInstance())->GetViewport();
 		if (viewport->IsFocused())
 		{
-			m_AxisY -= (data.xrel * 0.25f);
-			m_AxisX -= (data.yrel * 0.25f);
+			m_Yaw -= (data.xrel * 0.25f);
+			m_Pitch -= (data.yrel * 0.25f);
 
 			// Make sure it stays between 0-360
-			if (m_AxisX > 360)
+			if (m_Pitch > 360)
 			{
-				m_AxisX = m_AxisX - 360.0f;
+				m_Pitch = m_Pitch - 360.0f;
 			}
-			else if (m_AxisX < 0)
+			else if (m_Pitch < 0)
 			{
-				m_AxisX = m_AxisX + 360.0f;
+				m_Pitch = m_Pitch + 360.0f;
 			}
 
 			// Make sure it stays between 0-360
-			if (m_AxisY > 360)
+			if (m_Yaw > 360)
 			{
-				m_AxisY = m_AxisY - 360.0f;
+				m_Yaw = m_Yaw - 360.0f;
 			}
-			else if (m_AxisY < 0)
+			else if (m_Yaw < 0)
 			{
-				m_AxisY = m_AxisY + 360.0f;
+				m_Yaw = m_Yaw + 360.0f;
 			}
 		}
 	}
@@ -432,7 +472,7 @@ void Model::SetRasterState()
 	ZeroMemory(&rasterizerState, sizeof(D3D11_RASTERIZER_DESC));
 
 	rasterizerState.AntialiasedLineEnable = true;
-	rasterizerState.CullMode = D3D11_CULL_NONE; // D3D11_CULL_FRONT or D3D11_CULL_NONE D3D11_CULL_BACK
+	rasterizerState.CullMode = D3D11_CULL_FRONT; // D3D11_CULL_FRONT or D3D11_CULL_NONE D3D11_CULL_BACK
 	rasterizerState.FillMode = (m_Wireframe ? D3D11_FILL_WIREFRAME : D3D11_FILL_SOLID); // D3D11_FILL_SOLID  D3D11_FILL_WIREFRAME
 	rasterizerState.DepthBias = 0;
 	rasterizerState.DepthBiasClamp = 0.0f;

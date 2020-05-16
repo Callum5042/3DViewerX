@@ -19,6 +19,7 @@ struct VS_INPUT
 	float3 NormalL : NORMAL;
 	float2 Tex : TEXCOORD;
 	float3 TangentL : TANGENT;
+	float3 BitTangentL : BITTANGENT;
 };
 
 struct PS_INPUT
@@ -28,6 +29,7 @@ struct PS_INPUT
 	float3 NormalW : NORMAL;
 	float2 Tex : TEXCOORD;
 	float3 TangentW : TANGENT;
+	float3 BitTangentW : BITTANGENT;
 };
 
 Texture2D gDiffuseMap : register(t0);

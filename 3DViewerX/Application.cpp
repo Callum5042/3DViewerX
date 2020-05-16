@@ -46,6 +46,7 @@ void Application::OnUpdate()
 	ImGui::NewFrame();
 
 	//ImGui::ShowDemoWindow();
+	//ImGui::ShowMetricsWindow();
 
 	// Example layout
 	float width = static_cast<float>(GetWindow()->GetWidth());
@@ -97,9 +98,8 @@ void Application::OnUpdate()
 			}
 
 			// Model Details
-			if (ImGui::BeginTabItem("Details"))
+			if (ImGui::BeginTabItem("Model"))
 			{
-				ImGui::Text("Model");
 				if (m_Model->IsLoaded())
 				{
 					m_Model->Gui();

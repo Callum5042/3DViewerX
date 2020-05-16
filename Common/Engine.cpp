@@ -47,7 +47,7 @@ bool Engine::Initialise()
 {
 	// Create window
 	m_MainWindow = new MainWindow();
-	if (!m_MainWindow->Create("DirectX", 800, 600))
+	if (!m_MainWindow->Create("3D ViewerX", 800, 600))
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", SDL_GetError(), nullptr);
 		return false;

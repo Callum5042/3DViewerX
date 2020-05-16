@@ -26,6 +26,10 @@ struct SimpleVertex
 	float tx = 0;
 	float ty = 0;
 	float tz = 0;
+
+	float bx = 0;
+	float by = 0;
+	float bz = 0;
 };
 
 struct Mesh
@@ -56,32 +60,41 @@ public:
 	void OnMouseMotion(MouseData&& data) override;
 
 private:
-	DirectX::XMMATRIX m_World;
-
-	ID3D11Buffer* m_ConstantBuffer = nullptr;
-
-	float m_AxisX = 0.0f;
-	float m_AxisY = 0.0f;
-	float m_AxisZ = 0.0f;
-
-	bool m_Wireframe = false;
-
-	void SetRasterState();
-
 	Renderer* m_Renderer = nullptr;
 
-	std::vector<Mesh*> m_Meshes;
-
+	// Direct3D
+	DirectX::XMMATRIX m_World;
+	ID3D11Buffer* m_ConstantBuffer = nullptr;
 	ID3D11ShaderResourceView* m_DiffuseMapSRV = nullptr;
 	ID3D11ShaderResourceView* m_NormalMapSRV = nullptr;
 
-	bool m_IsLoaded = false;
+	// Rotation
+	float m_Pitch = 0.0f;
+	float m_Yaw = 0.0f;
+	float m_Roll = 0.0f;
+
+	// Scale
+	float m_ScaleX = 1.0f;
+	float m_ScaleY = 1.0f;
+	float m_ScaleZ = 1.0f;
+
+	// Translation
+	float m_PositionX = 0.0f;
+	float m_PositionY = 0.0f;
+	float m_PositionZ = 0.0f;
+
+	// Wireframe
+	bool m_Wireframe = false;
+	void SetRasterState();
+
+	// Model data
+	std::vector<Mesh*> m_Meshes;
 
 	std::string m_Name;
-
 	std::string texture_diffuse;
 	std::string texture_normal;
 
+	bool m_IsLoaded = false;
 	bool m_UseDiffuseTexture = false;
 	bool m_UseNormalTexture = false;
 };
