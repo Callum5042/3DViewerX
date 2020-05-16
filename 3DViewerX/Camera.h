@@ -9,6 +9,7 @@ public:
 	Camera();
 
 	void Update();
+	void Resize();
 
 	constexpr DirectX::XMMATRIX GetView() { return m_View; }
 	constexpr DirectX::XMMATRIX GetProjection() { return m_Projection; }
@@ -24,6 +25,4 @@ private:
 	float m_Distance = -20;
 	float m_PosX = 0;
 	float m_FOV = 85.0;
-
-	void Resize();
 };

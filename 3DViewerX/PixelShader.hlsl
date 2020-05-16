@@ -5,7 +5,7 @@ float4 main(PS_INPUT pin) : SV_TARGET
 {
 	// Interpolating normal can unnormalize it, so normalize it.
 	pin.NormalW = normalize(pin.NormalW);
-	
+
 	// Diffuse map
 	float4 diffuse = gDiffuseMap.Sample(samAnisotropic, pin.Tex);
 
@@ -28,18 +28,6 @@ float4 main(PS_INPUT pin) : SV_TARGET
 		float3 bumpedNormalW = mul(normalT, TBN);
 
 		pin.NormalW = bumpedNormalW;
-
-		//float3 normalMap = gNormalMap.Sample(samAnisotropic, pin.Tex).rgb;
-		//normalMap = (2.0f * normalMap) - 1.0f;
-		//pin.TangentW = normalize(pin.NormalW - dot(pin.TangentW, pin.NormalW) * pin.NormalW);
-
-		////Create the biTangent
-		//float3 biTangent = cross(pin.NormalW, pin.TangentW);
-
-		////Create the "Texture Space"
-		//float3x3 texSpace = float3x3(pin.TangentW, biTangent, pin.NormalW);
-
-		//pin.NormalW = normalize(mul(normalMap, texSpace));
 	}
 
 	// Lighting

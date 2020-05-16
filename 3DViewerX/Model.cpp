@@ -69,7 +69,7 @@ bool Model::Load(std::string&& filename)
 {
 	// Drawing
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(filename.c_str(), aiProcessPreset_TargetRealtime_Fast);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -142,20 +142,20 @@ bool Model::Load(std::string&& filename)
 			}
 
 			aiTextureType type = aiTextureType_DIFFUSE;
-			for (UINT i = 0; i < material->GetTextureCount(type); i++) 
+			for (UINT j = 0; j < material->GetTextureCount(type); j++) 
 			{
 				aiString str;
-				material->GetTexture(type, i, &str);
+				material->GetTexture(type, j, &str);
 				
 				texture_diffuse = std::string(str.C_Str());
 				std::cout << texture_diffuse << '\n';
 			}
 
 			type = aiTextureType_HEIGHT;
-			for (UINT i = 0; i < material->GetTextureCount(type); i++) 
+			for (UINT j = 0; j < material->GetTextureCount(type); j++) 
 			{
 				aiString str;
-				material->GetTexture(type, i, &str);
+				material->GetTexture(type, j, &str);
 				
 				texture_normal = std::string(str.C_Str());
 				std::cout << texture_normal << '\n';
@@ -330,10 +330,8 @@ void Model::Unload()
 	m_UseNormalTexture = false;
 }
 
-void Model::Update()
+void Model::Gui()
 {
-	ImGui::Begin("Model");
-
 	ImGui::Text("Name: %s", m_Name.c_str());
 
 	ImGui::Text("Rotation");
@@ -345,18 +343,19 @@ void Model::Update()
 	ImGui::Checkbox("Diffuse Texture", &m_UseDiffuseTexture);
 	ImGui::Checkbox("Normal Texture", &m_UseNormalTexture);
 
-	m_World = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_AxisX));
-	m_World *= DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_AxisY));
-	m_World *= DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_AxisZ));
-
 	for (auto& mesh : m_Meshes)
 	{
 		ImGui::Text("Name: %s", mesh->name.c_str());
 		ImGui::Text("Vertices: %i", mesh->vertices.size());
 		ImGui::Text("Indices: %i", mesh->indices.size());
 	}
+}
 
-	ImGui::End();
+void Model::Update()
+{
+	m_World = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_AxisX));
+	m_World *= DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_AxisY));
+	m_World *= DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_AxisZ));
 }
 
 void Model::Render()

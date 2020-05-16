@@ -17,11 +17,12 @@ public:
 private:
 	Renderer* m_Renderer = nullptr;
 
-	int m_Width = 800;
-	int m_Height = 600;
+	int m_Width = 0;
+	int m_Height = 0;
 
 	float m_WindowPosX = 0;
 	float m_WindowPosY = 0;
 
 	bool m_IsViewportFocused = false;
+	bool m_FirstResize = false;
 };

@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Model.h"
 #include "Viewport.h"
+#include "Timer.h"
 
 class Application : public Engine, public Events::WindowListener
 {
@@ -23,10 +24,17 @@ public:
 
 	constexpr Camera* GetCamera() { return m_Camera; }
 	constexpr Viewport* GetViewport() { return m_Viewport; }
+	constexpr Timer* GetTimer() { return m_Timer; }
+
+	constexpr double GetFPS() { return m_FPS; }
 
 private:
 	Renderer* m_Renderer = nullptr;
 	Camera* m_Camera = nullptr;
 	Model* m_Model = nullptr;
 	Viewport* m_Viewport = nullptr;
+	Timer* m_Timer = nullptr;
+
+	void CalculateFrameStats();
+	double m_FPS = 0;
 };

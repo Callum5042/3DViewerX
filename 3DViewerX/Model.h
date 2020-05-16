@@ -46,6 +46,7 @@ public:
 	bool Load(std::string&& filename);
 	void Unload();
 
+	void Gui();
 	void Update();
 	void Render();
 
@@ -71,8 +72,8 @@ private:
 
 	std::vector<Mesh*> m_Meshes;
 
-	ID3D11ShaderResourceView* m_DiffuseMapSRV;
-	ID3D11ShaderResourceView* m_NormalMapSRV;
+	ID3D11ShaderResourceView* m_DiffuseMapSRV = nullptr;
+	ID3D11ShaderResourceView* m_NormalMapSRV = nullptr;
 
 	bool m_IsLoaded = false;
 

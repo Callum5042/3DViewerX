@@ -17,14 +17,14 @@ Camera::Camera()
 
 void Camera::Update()
 {
-	ImGui::Begin("Camera");
+	//ImGui::Begin("Camera");
 
 	if (ImGui::SliderFloat("FOV", &m_FOV, 10.0f, 150.0f))
 	{
 		Resize();
 	}
 
-	ImGui::End();
+	//ImGui::End();
 }
 
 void Camera::OnKeyDown(Events::KeyData&& data)
@@ -39,7 +39,7 @@ void Camera::OnKeyDown(Events::KeyData&& data)
 		m_PosX += 1.0f;
 	}
 
-	DirectX::XMVECTOR eye = DirectX::XMVectorSet(m_PosX, 0.0f, m_Distance, 0.0f);
+	DirectX::XMVECTOR eye = DirectX::XMVectorSet(m_PosX, 0.0f, -4.0f, 0.0f);
 	DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	m_View = DirectX::XMMatrixLookAtLH(eye, at, up);

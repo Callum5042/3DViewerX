@@ -1,18 +1,16 @@
 
 #include "Application.h"
 #include <SDL_syswm.h>
-#include <fstream>
 #include <SDL_messagebox.h>
 
 #include "imgui.h"
 #include "examples/imgui_impl_sdl.h"
 #include "examples/imgui_impl_dx11.h"
 
-#include <filesystem>
-#include <iostream>
-
 #include <DDSTextureLoader.h>
-#include <Windows.h>
+#include "FileLoader.h"
+
+#include <iostream>
 
 bool Application::OnInitialise()
 {
@@ -30,190 +28,119 @@ bool Application::OnInitialise()
 	m_Viewport = new Viewport(m_Renderer);
 	m_Camera = new Camera();
 	m_Model = new Model(m_Renderer);
-	m_Model->Load("D:\\3d models\\wall\\pillar.obj");
-	//m_Model->Load("D:\\3d models\\crate\\crate.obj");
+	m_Model->Load("D:\\3d models\\crate\\crate.obj");
 
-	return true; 
-}
+	m_Timer = new Timer();
+	m_Timer->Reset();
 
-void FileDirectory(std::filesystem::path entry_path, std::filesystem::path* file)
-{
-	std::filesystem::directory_options options = std::filesystem::directory_options::skip_permission_denied;
-	for (const auto& entry : std::filesystem::directory_iterator(entry_path, options))
-	{
-		const auto path = entry.path();
-
-		if (entry.is_directory())
-		{
-			if (ImGui::TreeNode(path.string().c_str()))
-			{
-				FileDirectory(path, file);
-				ImGui::TreePop();
-			}
-		}
-		else if (entry.is_regular_file())
-		{
-			ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
-			ImGui::TreeNodeEx(path.filename().string().c_str(), node_flags);
-			if (ImGui::IsItemClicked())
-			{
-				const std::string extensions = path.extension().string();
-				if (extensions == ".obj")
-				{
-					*file = path;
-				}
-			}
-		}
-	}
+	return true;
 }
 
 void Application::OnUpdate()
 {
+	m_Timer->Tick();
+	CalculateFrameStats();
+
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplSDL2_NewFrame(GetWindow()->GetWindow());
 	ImGui::NewFrame();
 
 	//ImGui::ShowDemoWindow();
 
-	// Menu bar
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu("File"))
-		{
-			//ShowExampleMenuFile();
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("Edit"))
-		{
-			if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-			if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-			ImGui::Separator();
-			if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-			if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-			if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-			ImGui::EndMenu();
-		}
-
-		ImGui::EndMainMenuBar();
-	}
-
 	// Example layout
-	//bool* p_open = new bool(true);
-	//ImGui::SetNextWindowSize(ImVec2(500, 440), ImGuiCond_FirstUseEver);
-	//if (ImGui::Begin("Example: Simple layout", p_open, ImGuiWindowFlags_MenuBar))
-	//{
-	//	if (ImGui::BeginMenuBar())
-	//	{
-	//		if (ImGui::BeginMenu("File"))
-	//		{
-	//			if (ImGui::MenuItem("Close")) *p_open = false;
-	//			ImGui::EndMenu();
-	//		}
-	//		ImGui::EndMenuBar();
-	//	}
+	float width = static_cast<float>(GetWindow()->GetWidth());
+	float height = static_cast<float>(GetWindow()->GetHeight());
 
-	//	// Left
-	//	static int selected = 0;
-	//	{
-	//		ImGui::BeginChild("left pane", ImVec2(150, 0), true);
-	//		for (int i = 0; i < 100; i++)
-	//		{
-	//			char label[128];
-	//			//sprintf(label, "MyObject %d", i);
-	//			if (ImGui::Selectable(label, selected == i))
-	//				selected = i;
-	//		}
-	//		ImGui::EndChild();
-	//	}
-	//	ImGui::SameLine();
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(ImVec2(width, height));
+	ImGui::GetStyle().WindowRounding = 0.0f;
 
-	//	// Right
-	//	{
-	//		ImGui::BeginGroup();
-	//		ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
-	//		ImGui::Text("MyObject: %d", selected);
-	//		ImGui::Separator();
-	//		if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-	//		{
-	//			if (ImGui::BeginTabItem("Description"))
-	//			{
-	//				ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
-	//				ImGui::EndTabItem();
-	//			}
-	//			if (ImGui::BeginTabItem("Details"))
-	//			{
-	//				ImGui::Text("ID: 0123456789");
-	//				ImGui::EndTabItem();
-	//			}
-	//			ImGui::EndTabBar();
-	//		}
-	//		ImGui::EndChild();
-	//		if (ImGui::Button("Revert")) {}
-	//		ImGui::SameLine();
-	//		if (ImGui::Button("Save")) {}
-	//		ImGui::EndGroup();
-	//	}
-	//}
-	//ImGui::End();
-
-	
-	// Model loader
-	ImGui::Begin("Load");
-
-	// Get drives
-	DWORD dwSize = MAX_PATH;
-	char szLogicalDrives[MAX_PATH] = { 0 }; 
-	DWORD dwResult = GetLogicalDriveStringsA(dwSize, szLogicalDrives);
-
-	// Show directory tree
-	if (dwResult > 0 && dwResult <= MAX_PATH)
+	bool open = true;
+	if (ImGui::Begin("Example: Simple layout", &open, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar))
 	{
-		char* szSingleDrive = szLogicalDrives;
-		while (*szSingleDrive)
+		// Menu bar
+		if (ImGui::BeginMenuBar())
 		{
-			if (ImGui::TreeNode(szSingleDrive))
+			if (ImGui::BeginMenu("File"))
 			{
-				std::filesystem::path path(szSingleDrive);
+				ImGui::MenuItem("Close");
+				ImGui::EndMenu();
+			}
 
-				std::filesystem::path file;
-				FileDirectory(path, &file);
-				if (std::filesystem::is_regular_file(file))
+			ImGui::EndMenuBar();
+		}
+
+		ImGui::BeginChild("Load", ImVec2(300, 0), true);
+
+		ImGui::BeginGroup();
+		ImGui::BeginChild("item view"); // Leave room for 1 line below us
+		if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+		{
+			// File loader
+			if (ImGui::BeginTabItem("Load"))
+			{
+				std::filesystem::path path;
+				FileLoader::FileTree(std::move(path));
+
+				if (!path.empty())
 				{
 					std::cout << "Load file\n";
 					if (m_Model->IsLoaded())
 					{
-						// Unload
 						m_Model->Unload();
 					}
 
-					m_Model->Load(file.string());
+					m_Model->Load(path.string());
 				}
 
-				ImGui::TreePop();
+				ImGui::EndTabItem();
 			}
 
-			// get the next drive
-			szSingleDrive += strlen(szSingleDrive) + 1;
+			// Model Details
+			if (ImGui::BeginTabItem("Details"))
+			{
+				ImGui::Text("Model");
+				if (m_Model->IsLoaded())
+				{
+					m_Model->Gui();
+				}
+
+				ImGui::Spacing();
+				ImGui::Separator();
+
+				ImGui::Text("Camera");
+				m_Camera->Update();
+
+				ImGui::Spacing();
+				ImGui::Separator();
+
+				ImGui::Text("Lighting");
+				ImGui::SliderFloat("LX-Axis", &m_Renderer->m_LightDirX, -1.0f, 1.0f);
+				ImGui::SliderFloat("LY-Axis", &m_Renderer->m_LightDirY, -1.0f, 1.0f);
+				ImGui::SliderFloat("LZ-Axis", &m_Renderer->m_LightDirZ, -1.0f, 1.0f);
+
+				ImGui::EndTabItem();
+			}
+
+			ImGui::EndTabBar();
+		}
+		ImGui::EndChild();
+		ImGui::EndGroup();
+		ImGui::EndChild();
+		ImGui::SameLine();
+
+		// Right
+		{
+			m_Viewport->Update();
 		}
 	}
 
 	ImGui::End();
-
-	m_Camera->Update();
-	m_Viewport->Update();
 
 	if (m_Model->IsLoaded())
 	{
 		m_Model->Update();
 	}
-
-	ImGui::Begin("Lighting");
-
-	ImGui::SliderFloat("X-Axis", &m_Renderer->m_LightDirX, -1.0f, 1.0f);
-	ImGui::SliderFloat("Y-Axis", &m_Renderer->m_LightDirY, -1.0f, 1.0f);
-	ImGui::SliderFloat("Z-Axis", &m_Renderer->m_LightDirZ, -1.0f, 1.0f);
-
-	ImGui::End();
 }
 
 void Application::OnRender()
@@ -221,7 +148,7 @@ void Application::OnRender()
 	m_Renderer->ClearScreen();
 
 	// Draw Viewport
-	
+
 	m_Viewport->Set();
 	if (m_Model->IsLoaded())
 	{
@@ -245,4 +172,25 @@ void Application::OnQuit()
 void Application::OnResize(int width, int height)
 {
 	m_Renderer->Resize(width, height);
+}
+
+void Application::CalculateFrameStats()
+{
+	static int frameCnt = 0;
+	static float timeElapsed = 0.0f;
+
+	frameCnt++;
+
+	// Compute averages over one second period.
+	if ((m_Timer->TotalTime() - timeElapsed) >= 1.0f)
+	{
+		float fps = (float)frameCnt; // fps = frameCnt / 1
+		float mspf = 1000.0f / fps;
+
+		m_FPS = fps;
+
+		// Reset for next average.
+		frameCnt = 0;
+		timeElapsed += 1.0f;
+	}
 }
