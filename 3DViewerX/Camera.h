@@ -12,7 +12,19 @@ public:
 	void Update();
 	void Resize();
 
-	DirectX::XMMATRIX GetPosition() { return DirectX::XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z); }
+	DirectX::XMMATRIX GetPosition() 
+	{ 
+		DirectX::XMVECTOR position = DirectX::XMLoadFloat3(&m_Position);
+		DirectX::XMMATRIX camRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(DirectX::XMConvertToRadians(m_Pitch), DirectX::XMConvertToRadians(m_Yaw), 0);
+		position = XMVector3TransformCoord(position, camRotationMatrix);
+
+		DirectX::XMFLOAT4 pos;
+		DirectX::XMStoreFloat4(&pos, position);
+
+		return DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+	}
+
+
 	constexpr DirectX::XMMATRIX GetView() { return m_View; }
 	constexpr DirectX::XMMATRIX GetProjection() { return m_Projection; }
 	constexpr bool IsFreeroam() { return m_Freeroam; }
@@ -31,6 +43,8 @@ private:
 	DirectX::XMMATRIX m_Projection;
 	DirectX::XMFLOAT3 m_Position;
 
+	DirectX::XMFLOAT3 m_LockStartPosition;
+
 	// Gui
 	float m_FOV = 85.0;
 
@@ -38,7 +52,7 @@ private:
 	float m_Yaw = 0.0f;
 	float m_Roll = 0.0f;
 
-	bool m_Freeroam = true;
+	bool m_Freeroam = false;
 
 	// Keys
 	bool m_WDown = false;

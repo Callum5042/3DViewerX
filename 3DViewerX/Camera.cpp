@@ -10,6 +10,7 @@
 Camera::Camera()
 {
 	m_Position = DirectX::XMFLOAT3(0.0f, 0.0f, -4.0f);
+	m_LockStartPosition = m_Position;
 
 	Resize();
 }
@@ -40,7 +41,7 @@ void Camera::Update()
 			DirectX::XMMATRIX camRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(DirectX::XMConvertToRadians(m_Pitch), DirectX::XMConvertToRadians(m_Yaw), 0);
 			DirectX::XMVECTOR camTarget = XMVector3TransformCoord(forward, camRotationMatrix);
 
-			DirectX::XMVECTOR delta = DirectX::XMVectorReplicate(timer->DeltaTime() * 5.0f);
+			DirectX::XMVECTOR delta = DirectX::XMVectorReplicate((float)(timer->DeltaTime() * 5.0));
 			DirectX::XMVECTOR position = DirectX::XMLoadFloat3(&m_Position);
 			DirectX::XMStoreFloat3(&m_Position, DirectX::XMVectorMultiplyAdd(delta, camTarget, position));
 		}
@@ -50,7 +51,7 @@ void Camera::Update()
 			DirectX::XMMATRIX camRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(DirectX::XMConvertToRadians(m_Pitch), DirectX::XMConvertToRadians(m_Yaw), 0);
 			DirectX::XMVECTOR camTarget = XMVector3TransformCoord(forward, camRotationMatrix);
 
-			DirectX::XMVECTOR delta = DirectX::XMVectorReplicate(timer->DeltaTime() * 5.0f);
+			DirectX::XMVECTOR delta = DirectX::XMVectorReplicate((float)(timer->DeltaTime() * 5.0));
 			DirectX::XMVECTOR position = DirectX::XMLoadFloat3(&m_Position);
 			DirectX::XMStoreFloat3(&m_Position, DirectX::XMVectorMultiplyAdd(delta, camTarget, position));
 		}
@@ -61,24 +62,20 @@ void Camera::Update()
 			DirectX::XMMATRIX camRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(DirectX::XMConvertToRadians(m_Pitch), DirectX::XMConvertToRadians(m_Yaw), 0);
 			DirectX::XMVECTOR camTarget = XMVector3TransformCoord(forward, camRotationMatrix);
 
-			DirectX::XMVECTOR delta = DirectX::XMVectorReplicate(timer->DeltaTime() * 5.0f);
+			DirectX::XMVECTOR delta = DirectX::XMVectorReplicate((float)(timer->DeltaTime() * 5.0));
 			DirectX::XMVECTOR position = DirectX::XMLoadFloat3(&m_Position);
 			DirectX::XMStoreFloat3(&m_Position, DirectX::XMVectorMultiplyAdd(delta, camTarget, position));
 		}
-		else if(m_DDown)
+		else if (m_DDown)
 		{
 			DirectX::XMVECTOR forward = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 			DirectX::XMMATRIX camRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(DirectX::XMConvertToRadians(m_Pitch), DirectX::XMConvertToRadians(m_Yaw), 0);
 			DirectX::XMVECTOR camTarget = XMVector3TransformCoord(forward, camRotationMatrix);
 
-			DirectX::XMVECTOR delta = DirectX::XMVectorReplicate(timer->DeltaTime() * 5.0f);
+			DirectX::XMVECTOR delta = DirectX::XMVectorReplicate((float)(timer->DeltaTime() * 5.0));
 			DirectX::XMVECTOR position = DirectX::XMLoadFloat3(&m_Position);
 			DirectX::XMStoreFloat3(&m_Position, DirectX::XMVectorMultiplyAdd(delta, camTarget, position));
 		}
-	}
-	else
-	{
-
 	}
 
 	// Update camera
@@ -97,7 +94,11 @@ void Camera::Update()
 	}
 	else
 	{
-		DirectX::XMVECTOR eye = DirectX::XMVectorSet(m_Position.x, m_Position.y, m_Position.z, 1.0f);
+		DirectX::XMVECTOR position = DirectX::XMLoadFloat3(&m_Position);
+		DirectX::XMMATRIX camRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(DirectX::XMConvertToRadians(m_Pitch), DirectX::XMConvertToRadians(m_Yaw), 0);
+		position = XMVector3TransformCoord(position, camRotationMatrix);
+
+		DirectX::XMVECTOR eye = position;
 		DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 		DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 		m_View = DirectX::XMMatrixLookAtLH(eye, at, up);
@@ -149,7 +150,7 @@ void Camera::OnKeyReleased(Events::KeyData&& data)
 void Camera::OnMouseWheel(Events::MouseWheelEvent* e)
 {
 	if (e->wheel == MouseWheel::WHEEL_UP)
-	{ 
+	{
 		if (m_FOV > 10.0f)
 		{
 			m_FOV -= 1.0f;
