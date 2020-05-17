@@ -173,7 +173,7 @@ void Camera::OnMouseMotion(MouseData&& data)
 		Viewport* viewport = reinterpret_cast<Application*>(Application::GetInstance()->GetInstance())->GetViewport();
 		if (viewport->IsFocused())
 		{
-			//SDL_SetRelativeMouseMode(SDL_TRUE);
+			SDL_SetRelativeMouseMode(SDL_TRUE);
 
 			m_Yaw += (data.xrel * 0.25f);
 			m_Pitch += (data.yrel * 0.25f);
