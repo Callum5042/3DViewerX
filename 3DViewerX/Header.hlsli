@@ -6,6 +6,7 @@ cbuffer ConstantBuffer : register(b0)
 	matrix Projection;
 	int UseDiffuseTexture;
 	int UseNormalTexture;
+	int UseCubeMap;
 }
 
 cbuffer LightBuffer : register(b1)
@@ -34,5 +35,6 @@ struct PS_INPUT
 
 Texture2D gDiffuseMap : register(t0);
 Texture2D gNormalMap : register(t1);
+TextureCube gCubeMap : register(t2);
 
 SamplerState samAnisotropic : register(s0);

@@ -63,6 +63,8 @@ void Renderer::ClearScreen()
 	m_DeviceContext->ClearRenderTargetView(m_TextureRenderTargetView, reinterpret_cast<const float*>(&Blue));
 	m_DeviceContext->ClearDepthStencilView(m_TextureDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
+	m_DeviceContext->IASetInputLayout(m_VertexLayout);
+
 	// Bind shaders
 	m_DeviceContext->VSSetShader(m_VertexShader, nullptr, 0);
 	m_DeviceContext->PSSetShader(m_PixelShader, nullptr, 0);
@@ -360,9 +362,8 @@ bool Renderer::CreateVertexShader(std::string&& vertexShaderPath)
 
 	UINT numElements = ARRAYSIZE(layout);
 
-	ID3D11InputLayout* vertexLayout = nullptr;
-	m_Device->CreateInputLayout(layout, numElements, vertexbuffer, vertexsize, &vertexLayout);
-	m_DeviceContext->IASetInputLayout(vertexLayout);
+	m_Device->CreateInputLayout(layout, numElements, vertexbuffer, vertexsize, &m_VertexLayout);
+	// m_DeviceContext->IASetInputLayout(vertexLayout);
 
 	delete[] vertexbuffer;
 	return true;

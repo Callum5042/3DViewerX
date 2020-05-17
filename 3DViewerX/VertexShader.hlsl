@@ -11,7 +11,6 @@ PS_INPUT main(VS_INPUT input)
 	output.TangentW = mul(input.TangentL, (float3x3)World);
 	output.BitTangentW = mul(input.BitTangentL, (float3x3)World);
 
-	// Transform to homogeneous clip space.
 	output.PosH = mul(float4(input.PosL, 1.0f), World);
 	output.PosH = mul(output.PosH, View);
 	output.PosH = mul(output.PosH, Projection);

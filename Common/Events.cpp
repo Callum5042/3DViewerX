@@ -68,6 +68,18 @@ namespace
 				break;
 			}
 
+			case SDL_KEYUP:
+			{
+				if (!e.key.repeat)
+				{
+					auto keyEvent = new Events::KeyReleasedEvent();
+					keyEvent->key.key = e.key.keysym.scancode;
+
+					dispatcher->AddEvent(keyEvent);
+				}
+				break;
+			}
+
 			case SDL_MOUSEWHEEL:
 			{
 				auto mouseEvent = new Events::MouseWheelEvent();

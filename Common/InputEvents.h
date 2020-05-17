@@ -56,6 +56,15 @@ namespace Events
 		KeyData key;
 	};
 
+	class KeyReleasedEvent : public IEvent
+	{
+	public:
+		KeyReleasedEvent();
+		void Handle() override;
+
+		KeyData key;
+	};
+
 	class InputListener
 	{
 	public:
@@ -68,6 +77,7 @@ namespace Events
 		virtual void OnMouseWheel(MouseWheelEvent* e) { }
 
 		virtual void OnKeyDown(KeyData&& data) { }
+		virtual void OnKeyReleased(KeyData&& data) { }
 
 	private:
 		static std::vector<InputListener*> m_InputListeners;
@@ -77,5 +87,6 @@ namespace Events
 		friend class MouseWheelEvent;
 
 		friend class KeyDownEvent;
+		friend class KeyReleasedEvent;
 	};
 }

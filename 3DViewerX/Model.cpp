@@ -21,6 +21,9 @@
 #include <assimp\postprocess.h>
 #include <SDL_messagebox.h>
 
+#include "GeometryGenerator.h"
+#include <GeometricPrimitive.h>
+
 ID3D11SamplerState* g_Sampler = nullptr;
 
 namespace
@@ -211,11 +214,7 @@ bool Model::Load(std::string&& filename)
 	const SimpleVertex* vert = &vertices[0];
 	vInitData.pSysMem = vert;
 	
-	HRESULT hr = m_Renderer->GetDevice()->CreateBuffer(&vbd, &vInitData, &m_VertexBuffer);
-	if (FAILED(hr))
-		return false;
-	  
-	
+	DX::ThrowIfFailed(m_Renderer->GetDevice()->CreateBuffer(&vbd, &vInitData, &m_VertexBuffer));
 
 	// Index buffer description
 	D3D11_BUFFER_DESC ibd = {};
@@ -228,12 +227,7 @@ bool Model::Load(std::string&& filename)
 	const WORD* index = &indices[0];
 	iInitData.pSysMem = index;
 
-	hr = m_Renderer->GetDevice()->CreateBuffer(&ibd, &iInitData, &m_IndexBuffer);
-	if (FAILED(hr))
-		return false;
-
-	// Set index buffer
-	
+	DX::ThrowIfFailed(m_Renderer->GetDevice()->CreateBuffer(&ibd, &iInitData, &m_IndexBuffer));
 
 	// Set primitive topology
 	m_Renderer->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -244,12 +238,7 @@ bool Model::Load(std::string&& filename)
 	bd.ByteWidth = sizeof(ConstantBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	hr = m_Renderer->GetDevice()->CreateBuffer(&bd, nullptr, &m_ConstantBuffer);
-	if (FAILED(hr))
-	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "CreateBuffer failed", nullptr);
-		return false;
-	}
+	DX::ThrowIfFailed(m_Renderer->GetDevice()->CreateBuffer(&bd, nullptr, &m_ConstantBuffer));
 
 	// Perspective View
 	m_World = DirectX::XMMatrixIdentity();
@@ -315,20 +304,9 @@ void Model::Unload()
 	m_Yaw = 0.0f;
 	m_Roll = 0.0f;
 
-	if (m_DiffuseMapSRV != nullptr)
-	{
-		m_DiffuseMapSRV->Release();
-		m_DiffuseMapSRV = nullptr;
-	}
-
-	if (m_NormalMapSRV != nullptr)
-	{
-		m_NormalMapSRV->Release();
-		m_NormalMapSRV = nullptr;
-	}
-
-	m_ConstantBuffer->Release();
-	m_ConstantBuffer = nullptr;
+	DX::SafeRelease(m_DiffuseMapSRV);
+	DX::SafeRelease(m_NormalMapSRV);
+	DX::SafeRelease(m_ConstantBuffer);
 
 	m_IsLoaded = false;
 
@@ -487,7 +465,7 @@ void Model::SetRasterState()
 	ZeroMemory(&rasterizerState, sizeof(D3D11_RASTERIZER_DESC));
 
 	rasterizerState.AntialiasedLineEnable = true;
-	rasterizerState.CullMode = D3D11_CULL_FRONT; // D3D11_CULL_FRONT or D3D11_CULL_NONE D3D11_CULL_BACK
+	rasterizerState.CullMode = (m_Wireframe ? D3D11_CULL_NONE : D3D11_CULL_FRONT); ; // D3D11_CULL_FRONT or D3D11_CULL_NONE D3D11_CULL_BACK
 	rasterizerState.FillMode = (m_Wireframe ? D3D11_FILL_WIREFRAME : D3D11_FILL_SOLID); // D3D11_FILL_SOLID  D3D11_FILL_WIREFRAME
 	rasterizerState.DepthBias = 0;
 	rasterizerState.DepthBiasClamp = 0.0f;

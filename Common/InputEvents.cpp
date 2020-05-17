@@ -73,3 +73,16 @@ void Events::KeyDownEvent::Handle()
 		listener->OnKeyDown(std::move(key));
 	}
 }
+
+Events::KeyReleasedEvent::KeyReleasedEvent()
+{
+	EventType::KEY_RELEASED;
+}
+
+void Events::KeyReleasedEvent::Handle()
+{
+	for (auto& listener : InputListener::m_InputListeners)
+	{
+		listener->OnKeyReleased(std::move(key));
+	}
+}

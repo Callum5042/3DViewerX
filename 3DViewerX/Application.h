@@ -35,6 +35,7 @@ private:
 	Model* m_Model = nullptr;
 	Viewport* m_Viewport = nullptr;
 	Timer* m_Timer = nullptr;
+	Sky* m_Sky = nullptr;
 
 	void CalculateFrameStats();
 	double m_FPS = 0;

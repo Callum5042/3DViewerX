@@ -65,6 +65,8 @@ private:
 
 	ID3D11Texture2D* m_Texture = nullptr;
 	ID3D11ShaderResourceView* m_TextureMap = nullptr;
+
+	ID3D11InputLayout* m_VertexLayout = nullptr;
 };
 
 namespace DX
@@ -74,6 +76,15 @@ namespace DX
 		if (FAILED(hr))
 		{
 			throw std::exception();
+		}
+	}
+
+	inline void SafeRelease(IUnknown* ref)
+	{
+		if (ref != nullptr)
+		{
+			ref->Release();
+			ref = nullptr;
 		}
 	}
 }

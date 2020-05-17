@@ -33,6 +33,9 @@ bool Application::OnInitialise()
 	m_Timer = new Timer();
 	m_Timer->Reset();
 
+	m_Sky = new Sky(m_Renderer);
+	m_Sky->Load();
+
 	return true;
 }
 
@@ -114,7 +117,7 @@ void Application::OnUpdate()
 			if (ImGui::BeginTabItem("Scene"))
 			{
 				ImGui::Text("Camera");
-				m_Camera->Update();
+				m_Camera->Gui();
 
 				ImGui::Spacing();
 				ImGui::Separator();
@@ -147,6 +150,8 @@ void Application::OnUpdate()
 	{
 		m_Model->Update();
 	}
+
+	m_Camera->Update();
 }
 
 void Application::OnRender()
@@ -160,6 +165,8 @@ void Application::OnRender()
 	{
 		m_Model->Render();
 	}
+
+	m_Sky->Render();
 
 	// Draw GUI
 	m_Renderer->SetWindowTarget();

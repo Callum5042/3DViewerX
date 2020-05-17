@@ -22,6 +22,12 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{836c28c1-f3b5-4fea-9edb-52257f2a5563}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Sky">
+      <UniqueIdentifier>{ed0524e9-1a9d-4b29-8be1-a4777fcfd70e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Model">
+      <UniqueIdentifier>{8f25f667-d222-40ef-b33d-37daa82c0a02}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -88,6 +94,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Sky.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeometryGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -167,18 +176,30 @@
     <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GeometryGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="PixelShader.hlsl">
-      <Filter>Shaders</Filter>
+    <FxCompile Include="SkyPixelShader.hlsl">
+      <Filter>Shaders\Sky</Filter>
+    </FxCompile>
+    <FxCompile Include="SkyVertexShader.hlsl">
+      <Filter>Shaders\Sky</Filter>
     </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Model</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>Shaders\Model</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="SkyHeader.hlsli">
+      <Filter>Shaders\Sky</Filter>
+    </None>
     <None Include="Header.hlsli">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Model</Filter>
     </None>
   </ItemGroup>
 </Project>
