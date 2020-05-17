@@ -106,13 +106,19 @@ void Application::OnUpdate()
 				}
 
 				ImGui::Spacing();
-				ImGui::Separator();
 
+				ImGui::EndTabItem();
+			}
+
+			// Scene Details
+			if (ImGui::BeginTabItem("Scene"))
+			{
 				ImGui::Text("Camera");
 				m_Camera->Update();
 
 				ImGui::Spacing();
 				ImGui::Separator();
+				ImGui::Spacing();
 
 				ImGui::Text("Lighting");
 				ImGui::SliderFloat("LX-Axis", &m_Renderer->m_LightDirX, -1.0f, 1.0f);
@@ -148,8 +154,8 @@ void Application::OnRender()
 	m_Renderer->ClearScreen();
 
 	// Draw Viewport
-
 	m_Viewport->Set();
+
 	if (m_Model->IsLoaded())
 	{
 		m_Model->Render();

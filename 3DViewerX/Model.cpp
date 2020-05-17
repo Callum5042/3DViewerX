@@ -210,17 +210,12 @@ bool Model::Load(std::string&& filename)
 
 	const SimpleVertex* vert = &vertices[0];
 	vInitData.pSysMem = vert;
-
-	ID3D11Buffer* vertexBuffer = nullptr;
-	HRESULT hr = m_Renderer->GetDevice()->CreateBuffer(&vbd, &vInitData, &vertexBuffer);
+	
+	HRESULT hr = m_Renderer->GetDevice()->CreateBuffer(&vbd, &vInitData, &m_VertexBuffer);
 	if (FAILED(hr))
 		return false;
 	  
-	// Set vertex buffer
-	UINT stride = sizeof(SimpleVertex);
-	UINT offset = 0;
-
-	m_Renderer->GetDeviceContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+	
 
 	// Index buffer description
 	D3D11_BUFFER_DESC ibd = {};
@@ -233,13 +228,12 @@ bool Model::Load(std::string&& filename)
 	const WORD* index = &indices[0];
 	iInitData.pSysMem = index;
 
-	ID3D11Buffer* indexBuffer = nullptr;
-	hr = m_Renderer->GetDevice()->CreateBuffer(&ibd, &iInitData, &indexBuffer);
+	hr = m_Renderer->GetDevice()->CreateBuffer(&ibd, &iInitData, &m_IndexBuffer);
 	if (FAILED(hr))
 		return false;
 
-	// Set vertex buffer
-	m_Renderer->GetDeviceContext()->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R16_UINT, 0);
+	// Set index buffer
+	
 
 	// Set primitive topology
 	m_Renderer->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -348,33 +342,48 @@ void Model::Unload()
 void Model::Gui()
 {
 	ImGui::Text("File: %s", m_Name.c_str());
+
+	ImGui::Spacing();
 	ImGui::Separator();
+	ImGui::Spacing();
 
 	for (auto& mesh : m_Meshes)
 	{
 		ImGui::Text("Name: %s", mesh->name.c_str());
 		ImGui::Text("Vertices: %i", mesh->vertices.size());
 		ImGui::Text("Indices: %i", mesh->indices.size());
+
+		ImGui::Spacing();
 		ImGui::Separator();
+		ImGui::Spacing();
 	}
 
 	ImGui::Text("Position");
 	ImGui::SliderFloat("Position X", &m_PositionX, -10.0f, 10.f);
 	ImGui::SliderFloat("Position Y", &m_PositionY, -10.0f, 10.f);
 	ImGui::SliderFloat("Position Z", &m_PositionZ, -10.0f, 10.f);
+
+	ImGui::Spacing();
 	ImGui::Separator();
+	ImGui::Spacing();
 
 	ImGui::Text("Rotation");
 	ImGui::SliderFloat("Rotate X", &m_Pitch, 0.0f, 360.0f);
 	ImGui::SliderFloat("Rotate Y", &m_Yaw, 0.0f, 360.0f);
 	ImGui::SliderFloat("Rotate Z", &m_Roll, 0.0f, 360.0f);
+
+	ImGui::Spacing();
 	ImGui::Separator();
+	ImGui::Spacing();
 
 	ImGui::Text("Scaling");
 	ImGui::SliderFloat("Scale X", &m_ScaleX, 0.0f, 10.0f);
 	ImGui::SliderFloat("Scale Y", &m_ScaleY, 0.0f, 10.0f);
 	ImGui::SliderFloat("Scale Z", &m_ScaleZ, 0.0f, 10.0f);
+
+	ImGui::Spacing();
 	ImGui::Separator();
+	ImGui::Spacing();
 
 	ImGui::Checkbox("Wireframe", &m_Wireframe);
 	ImGui::Checkbox("Diffuse Texture", &m_UseDiffuseTexture);
@@ -414,12 +423,18 @@ void Model::Render()
 	cb.mUseDiffuseTexture = m_UseDiffuseTexture;
 	cb.mUseNormalTexture = m_UseNormalTexture;
 
+	// Set vertex buffer
+	UINT stride = sizeof(SimpleVertex);
+	UINT offset = 0;
+
+	m_Renderer->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_VertexBuffer, &stride, &offset);
+	m_Renderer->GetDeviceContext()->IASetIndexBuffer(m_IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
 	m_Renderer->GetDeviceContext()->VSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 
 	m_Renderer->GetDeviceContext()->PSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 	m_Renderer->GetDeviceContext()->PSSetShaderResources(0, 1, &m_DiffuseMapSRV);
 	m_Renderer->GetDeviceContext()->PSSetShaderResources(1, 1, &m_NormalMapSRV);
-
 	m_Renderer->GetDeviceContext()->PSSetSamplers(0, 1, &g_Sampler);
 
 	m_Renderer->GetDeviceContext()->UpdateSubresource(m_ConstantBuffer, 0, nullptr, &cb, 0, 0);

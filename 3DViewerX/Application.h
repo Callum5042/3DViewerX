@@ -8,6 +8,7 @@
 #include "Model.h"
 #include "Viewport.h"
 #include "Timer.h"
+#include "Sky.h"
 
 class Application : public Engine, public Events::WindowListener
 {
