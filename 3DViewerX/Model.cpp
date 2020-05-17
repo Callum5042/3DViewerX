@@ -428,35 +428,35 @@ void Model::Render()
 
 void Model::OnMouseMotion(MouseData&& data)
 {
-	if (data.button == MouseButton::MOUSE_LMASK)
-	{
-		Viewport* viewport = reinterpret_cast<Application*>(Application::GetInstance()->GetInstance())->GetViewport();
-		if (viewport->IsFocused())
-		{
-			m_Yaw -= (data.xrel * 0.25f);
-			m_Pitch -= (data.yrel * 0.25f);
+	//if (data.button == MouseButton::MOUSE_LMASK)
+	//{
+	//	Viewport* viewport = reinterpret_cast<Application*>(Application::GetInstance()->GetInstance())->GetViewport();
+	//	if (viewport->IsFocused())
+	//	{
+	//		m_Yaw -= (data.xrel * 0.25f);
+	//		m_Pitch -= (data.yrel * 0.25f);
 
-			// Make sure it stays between 0-360
-			if (m_Pitch > 360)
-			{
-				m_Pitch = m_Pitch - 360.0f;
-			}
-			else if (m_Pitch < 0)
-			{
-				m_Pitch = m_Pitch + 360.0f;
-			}
+	//		// Make sure it stays between 0-360
+	//		if (m_Pitch > 360)
+	//		{
+	//			m_Pitch = m_Pitch - 360.0f;
+	//		}
+	//		else if (m_Pitch < 0)
+	//		{
+	//			m_Pitch = m_Pitch + 360.0f;
+	//		}
 
-			// Make sure it stays between 0-360
-			if (m_Yaw > 360)
-			{
-				m_Yaw = m_Yaw - 360.0f;
-			}
-			else if (m_Yaw < 0)
-			{
-				m_Yaw = m_Yaw + 360.0f;
-			}
-		}
-	}
+	//		// Make sure it stays between 0-360
+	//		if (m_Yaw > 360)
+	//		{
+	//			m_Yaw = m_Yaw - 360.0f;
+	//		}
+	//		else if (m_Yaw < 0)
+	//		{
+	//			m_Yaw = m_Yaw + 360.0f;
+	//		}
+	//	}
+	//}
 }
 
 void Model::SetRasterState()

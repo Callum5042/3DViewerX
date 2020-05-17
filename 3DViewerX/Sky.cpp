@@ -8,7 +8,9 @@
 
 _declspec(align(16)) struct ConstantBuffer
 {
-	DirectX::XMMATRIX mWorldViewProj;
+	DirectX::XMMATRIX mWorld;
+	DirectX::XMMATRIX mView;
+	DirectX::XMMATRIX mProj;
 };
 
 Sky::Sky(Renderer* renderer) : m_Renderer(renderer)
@@ -108,7 +110,9 @@ void Sky::Render()
 
 	// Shader thing
 	ConstantBuffer cb;
-	cb.mWorldViewProj = DirectX::XMMatrixTranspose(WVP);
+	cb.mWorld = DirectX::XMMatrixTranspose(world);
+	cb.mView = DirectX::XMMatrixTranspose(view);
+	cb.mProj = DirectX::XMMatrixTranspose(projection);
 
 	// Set vertex buffer
 	UINT stride = sizeof(SimpleVertex);
@@ -160,7 +164,6 @@ void Sky::CreateVertexShader(std::string&& vertexShaderPath)
 
 	UINT numElements = ARRAYSIZE(layout);
 	m_Device->CreateInputLayout(layout, numElements, vertexbuffer, vertexsize, &m_VertexLayout);
-	//m_DeviceContext->IASetInputLayout(vertexLayout);
 
 	delete[] vertexbuffer;
 }
