@@ -52,7 +52,7 @@ private:
 	// Gui
 	float m_FOV = 85.0;
 
-	float m_Pitch = 0.0f;
+	float m_Pitch = 30.0f;
 	float m_Yaw = 0.0f;
 	float m_Roll = 0.0f;
 

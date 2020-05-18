@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <d3d11_4.h>
 typedef unsigned short WORD;
 
 struct SimpleVertex
@@ -42,4 +43,7 @@ struct Mesh
 	int startIndex = 0;
 	int startVertex = 0;
 	std::string name;
+
+	ID3D11ShaderResourceView* m_DiffuseMapSRV = nullptr;
+	ID3D11ShaderResourceView* m_NormalMapSRV = nullptr;
 };

@@ -32,8 +32,6 @@ private:
 	// Direct3D
 	DirectX::XMMATRIX m_World;
 	ID3D11Buffer* m_ConstantBuffer = nullptr;
-	ID3D11ShaderResourceView* m_DiffuseMapSRV = nullptr;
-	ID3D11ShaderResourceView* m_NormalMapSRV = nullptr;
 
 	//buffer data
 	ID3D11Buffer* m_VertexBuffer = nullptr;
@@ -62,8 +60,6 @@ private:
 	std::vector<Mesh*> m_Meshes;
 
 	std::string m_Name;
-	std::string texture_diffuse;
-	std::string texture_normal;
 
 	bool m_IsLoaded = false;
 	bool m_UseDiffuseTexture = false;

@@ -154,8 +154,20 @@ bool Model::Load(std::string&& filename)
 				aiString str;
 				material->GetTexture(type, j, &str);
 				
-				texture_diffuse = std::string(str.C_Str());
+				std::string texture_diffuse = std::string(str.C_Str());
 				std::cout << texture_diffuse << '\n';
+
+				std::filesystem::path diffuse_file_path = std::filesystem::path(filename).parent_path() /= std::filesystem::path(texture_diffuse);
+
+				std::wstringstream texture_filename_stream;
+				texture_filename_stream << diffuse_file_path.string().c_str();
+				std::wstring texture_filename_narrow = texture_filename_stream.str();
+
+				ID3D11Resource* texResource = nullptr;
+				DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow.c_str(), &texResource, &obj_mesh->m_DiffuseMapSRV));
+				texResource->Release();
+
+				m_UseDiffuseTexture = true;
 			}
 
 			// WAVEFRONT .OBJ maps the normal texture to the height for some reason
@@ -165,8 +177,20 @@ bool Model::Load(std::string&& filename)
 				aiString str;
 				material->GetTexture(type, j, &str);
 				
-				texture_normal = std::string(str.C_Str());
+				std::string texture_normal = std::string(str.C_Str());
 				std::cout << texture_normal << '\n';
+
+				std::filesystem::path normal_file_path = std::filesystem::path(filename).parent_path() /= std::filesystem::path(texture_normal);
+
+				std::wstringstream texture_filename_stream1;
+				texture_filename_stream1 << normal_file_path.string().c_str();
+				std::wstring texture_filename_narrow1 = texture_filename_stream1.str();
+
+				ID3D11Resource* texResource = nullptr;
+				DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow1.c_str(), &texResource, &obj_mesh->m_NormalMapSRV));
+				texResource->Release();
+
+				m_UseNormalTexture = true;
 			}
 
 			type = aiTextureType_NORMALS;
@@ -174,9 +198,21 @@ bool Model::Load(std::string&& filename)
 			{
 				aiString str;
 				material->GetTexture(type, j, &str);
-				
-				texture_normal = std::string(str.C_Str());
+
+				std::string texture_normal = std::string(str.C_Str());
 				std::cout << texture_normal << '\n';
+
+				std::filesystem::path normal_file_path = std::filesystem::path(filename).parent_path() /= std::filesystem::path(texture_normal);
+
+				std::wstringstream texture_filename_stream1;
+				texture_filename_stream1 << normal_file_path.string().c_str();
+				std::wstring texture_filename_narrow1 = texture_filename_stream1.str();
+
+				ID3D11Resource* texResource = nullptr;
+				DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(m_Renderer->GetDevice(), texture_filename_narrow1.c_str(), &texResource, &obj_mesh->m_NormalMapSRV));
+				texResource->Release();
+
+				m_UseNormalTexture = true;
 			}
 		}
 
@@ -244,7 +280,7 @@ bool Model::Load(std::string&& filename)
 	m_World = DirectX::XMMatrixIdentity();
 
 	// Texture
-	if (!texture_diffuse.empty())
+	/*if (!texture_diffuse.empty())
 	{
 		std::filesystem::path diffuse_file_path = std::filesystem::path(filename).parent_path() /= std::filesystem::path(texture_diffuse);
 		std::filesystem::path normal_file_path = std::filesystem::path(filename).parent_path() /= std::filesystem::path(texture_normal);
@@ -272,7 +308,7 @@ bool Model::Load(std::string&& filename)
 
 			m_UseNormalTexture = true;
 		}
-	}
+	}*/
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
@@ -304,14 +340,14 @@ void Model::Unload()
 	m_Yaw = 0.0f;
 	m_Roll = 0.0f;
 
-	DX::SafeRelease(m_DiffuseMapSRV);
-	DX::SafeRelease(m_NormalMapSRV);
+	/*DX::SafeRelease(m_DiffuseMapSRV);
+	DX::SafeRelease(m_NormalMapSRV);*/
 	DX::SafeRelease(m_ConstantBuffer);
 
 	m_IsLoaded = false;
 
-	texture_diffuse.clear();
-	texture_normal.clear();
+	/*texture_diffuse.clear();
+	texture_normal.clear();*/
 
 	m_UseDiffuseTexture = false;
 	m_UseNormalTexture = false;
@@ -337,7 +373,6 @@ void Model::Gui()
 	}
 
 	ImGui::Text("Position");
-	//ImGui::SliderFloat("Position X", &m_PositionX, -10.0f, 10.f);
 	ImGui::DragFloat("Position X", &m_PositionX, 0.1f);
 	ImGui::DragFloat("Position Y", &m_PositionY, 0.1f);
 	ImGui::DragFloat("Position Z", &m_PositionZ, 0.1f);
@@ -412,8 +447,6 @@ void Model::Render()
 	m_Renderer->GetDeviceContext()->VSSetConstantBuffers(0, 1, &m_ConstantBuffer);
 
 	m_Renderer->GetDeviceContext()->PSSetConstantBuffers(0, 1, &m_ConstantBuffer);
-	m_Renderer->GetDeviceContext()->PSSetShaderResources(0, 1, &m_DiffuseMapSRV);
-	m_Renderer->GetDeviceContext()->PSSetShaderResources(1, 1, &m_NormalMapSRV);
 	m_Renderer->GetDeviceContext()->PSSetSamplers(0, 1, &g_Sampler);
 
 	m_Renderer->GetDeviceContext()->UpdateSubresource(m_ConstantBuffer, 0, nullptr, &cb, 0, 0);
@@ -423,41 +456,16 @@ void Model::Render()
 	// Render triangle
 	for (auto& mesh : m_Meshes)
 	{
+
+		m_Renderer->GetDeviceContext()->PSSetShaderResources(0, 1, &mesh->m_DiffuseMapSRV);
+		m_Renderer->GetDeviceContext()->PSSetShaderResources(1, 1, &mesh->m_NormalMapSRV);
 		m_Renderer->GetDeviceContext()->DrawIndexed((UINT)mesh->indices.size(), (UINT)mesh->startIndex, mesh->startVertex);
 	}
 }
 
 void Model::OnMouseMotion(MouseData&& data)
 {
-	//if (data.button == MouseButton::MOUSE_LMASK)
-	//{
-	//	Viewport* viewport = reinterpret_cast<Application*>(Application::GetInstance()->GetInstance())->GetViewport();
-	//	if (viewport->IsFocused())
-	//	{
-	//		m_Yaw -= (data.xrel * 0.25f);
-	//		m_Pitch -= (data.yrel * 0.25f);
 
-	//		// Make sure it stays between 0-360
-	//		if (m_Pitch > 360)
-	//		{
-	//			m_Pitch = m_Pitch - 360.0f;
-	//		}
-	//		else if (m_Pitch < 0)
-	//		{
-	//			m_Pitch = m_Pitch + 360.0f;
-	//		}
-
-	//		// Make sure it stays between 0-360
-	//		if (m_Yaw > 360)
-	//		{
-	//			m_Yaw = m_Yaw - 360.0f;
-	//		}
-	//		else if (m_Yaw < 0)
-	//		{
-	//			m_Yaw = m_Yaw + 360.0f;
-	//		}
-	//	}
-	//}
 }
 
 void Model::SetRasterState()

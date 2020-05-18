@@ -28,7 +28,7 @@ bool Application::OnInitialise()
 	m_Viewport = new Viewport(m_Renderer);
 	m_Camera = new Camera();
 	m_Model = new Model(m_Renderer);
-	m_Model->Load("D:\\3d models\\crate\\crate.obj");
+	m_Model->Load("D:\\3d models\\scene\\scene.obj");
 
 	m_Timer = new Timer();
 	m_Timer->Reset();
