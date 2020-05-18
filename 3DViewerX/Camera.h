@@ -14,14 +14,20 @@ public:
 
 	DirectX::XMMATRIX GetPosition() 
 	{ 
-		DirectX::XMVECTOR position = DirectX::XMLoadFloat3(&m_Position);
-		DirectX::XMMATRIX camRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(DirectX::XMConvertToRadians(m_Pitch), DirectX::XMConvertToRadians(m_Yaw), 0);
-		position = XMVector3TransformCoord(position, camRotationMatrix);
+		if (m_Freeroam)
+		{
+			return DirectX::XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z);
+		}
+		else
+		{
+			DirectX::XMVECTOR position = DirectX::XMLoadFloat3(&m_Position);
+			DirectX::XMMATRIX camRotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(DirectX::XMConvertToRadians(m_Pitch), DirectX::XMConvertToRadians(m_Yaw), 0);
+			position = XMVector3TransformCoord(position, camRotationMatrix);
 
-		DirectX::XMFLOAT4 pos;
-		DirectX::XMStoreFloat4(&pos, position);
-
-		return DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+			DirectX::XMFLOAT4 pos;
+			DirectX::XMStoreFloat4(&pos, position);
+			return DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+		}
 	}
 
 
@@ -42,8 +48,6 @@ private:
 	DirectX::XMMATRIX m_View;
 	DirectX::XMMATRIX m_Projection;
 	DirectX::XMFLOAT3 m_Position;
-
-	DirectX::XMFLOAT3 m_LockStartPosition;
 
 	// Gui
 	float m_FOV = 85.0;

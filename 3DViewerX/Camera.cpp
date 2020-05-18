@@ -10,7 +10,6 @@
 Camera::Camera()
 {
 	m_Position = DirectX::XMFLOAT3(0.0f, 0.0f, -4.0f);
-	m_LockStartPosition = m_Position;
 
 	Resize();
 }

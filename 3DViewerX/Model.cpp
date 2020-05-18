@@ -337,27 +337,28 @@ void Model::Gui()
 	}
 
 	ImGui::Text("Position");
-	ImGui::SliderFloat("Position X", &m_PositionX, -10.0f, 10.f);
-	ImGui::SliderFloat("Position Y", &m_PositionY, -10.0f, 10.f);
-	ImGui::SliderFloat("Position Z", &m_PositionZ, -10.0f, 10.f);
+	//ImGui::SliderFloat("Position X", &m_PositionX, -10.0f, 10.f);
+	ImGui::DragFloat("Position X", &m_PositionX, 0.1f);
+	ImGui::DragFloat("Position Y", &m_PositionY, 0.1f);
+	ImGui::DragFloat("Position Z", &m_PositionZ, 0.1f);
 
 	ImGui::Spacing();
 	ImGui::Separator();
 	ImGui::Spacing();
 
 	ImGui::Text("Rotation");
-	ImGui::SliderFloat("Rotate X", &m_Pitch, 0.0f, 360.0f);
-	ImGui::SliderFloat("Rotate Y", &m_Yaw, 0.0f, 360.0f);
-	ImGui::SliderFloat("Rotate Z", &m_Roll, 0.0f, 360.0f);
+	ImGui::DragFloat("Rotate X", &m_Pitch, 0.1f);
+	ImGui::DragFloat("Rotate Y", &m_Yaw, 0.1f);
+	ImGui::DragFloat("Rotate Z", &m_Roll, 0.1f);
 
-	ImGui::Spacing();
+	ImGui::Spacing();  
 	ImGui::Separator();
 	ImGui::Spacing();
 
 	ImGui::Text("Scaling");
-	ImGui::SliderFloat("Scale X", &m_ScaleX, 0.0f, 10.0f);
-	ImGui::SliderFloat("Scale Y", &m_ScaleY, 0.0f, 10.0f);
-	ImGui::SliderFloat("Scale Z", &m_ScaleZ, 0.0f, 10.0f);
+	ImGui::DragFloat("Scale X", &m_ScaleX, 0.1f);
+	ImGui::DragFloat("Scale Y", &m_ScaleY, 0.1f);
+	ImGui::DragFloat("Scale Z", &m_ScaleZ, 0.1f);
 
 	ImGui::Spacing();
 	ImGui::Separator();
