@@ -96,8 +96,6 @@
     <ClCompile Include="..\Common\Events.cpp" />
     <ClCompile Include="..\Common\InputEvents.cpp" />
     <ClCompile Include="..\Common\MainWindow.cpp" />
-    <ClCompile Include="..\Common\RenderDevice.cpp" />
-    <ClCompile Include="..\Common\Shader.cpp" />
     <ClCompile Include="..\Common\WindowEvents.cpp" />
     <ClCompile Include="..\imgui\examples\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\imgui\examples\imgui_impl_sdl.cpp" />
@@ -122,8 +120,6 @@
     <ClInclude Include="..\Common\Input.h" />
     <ClInclude Include="..\Common\InputEvents.h" />
     <ClInclude Include="..\Common\MainWindow.h" />
-    <ClInclude Include="..\Common\RenderDevice.h" />
-    <ClInclude Include="..\Common\Shader.h" />
     <ClInclude Include="..\Common\WindowEvents.h" />
     <ClInclude Include="..\imgui\examples\imgui_impl_dx11.h" />
     <ClInclude Include="..\imgui\examples\imgui_impl_sdl.h" />

@@ -27,7 +27,7 @@ namespace Events
 	{
 	public:
 		WindowListener();
-		virtual ~WindowListener() = default;
+		virtual ~WindowListener();
 
 		virtual void OnQuit() { }
 		virtual void OnResize(int width, int height) { }

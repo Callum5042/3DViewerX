@@ -1,8 +1,9 @@
 
 #include "Application.h"
+#include <memory>
 
 int main(int argc, char** argv)
 {
-	Engine* engine = new Application();
+	std::unique_ptr<Engine> engine(new Application());
 	return engine->Execute(argc, argv);
 }

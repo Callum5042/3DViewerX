@@ -15,6 +15,7 @@ enum class MouseButton
 
 enum class MouseWheel
 {
+	WHEEL_NONE = 0,
 	WHEEL_UP = 1,
 	WHEEL_DOWN = -1,
 };

@@ -9,6 +9,12 @@ Events::InputListener::InputListener()
 	m_InputListeners.push_back(this);
 }
 
+Events::InputListener::~InputListener()
+{
+	auto it = std::find(m_InputListeners.begin(), m_InputListeners.end(), this);
+	m_InputListeners.erase(it);
+}
+
 Events::MousePressedEvent::MousePressedEvent()
 {
 	m_EventType = EventType::MOUSE_PRESSED;
@@ -16,7 +22,10 @@ Events::MousePressedEvent::MousePressedEvent()
 
 void Events::MousePressedEvent::Handle()
 {
-	for (auto& listener : InputListener::m_InputListeners)
+	std::vector<Events::InputListener*> list;
+	list.insert(list.end(), InputListener::m_InputListeners.begin(), InputListener::m_InputListeners.end());
+
+	for (auto& listener : list)
 	{
 		listener->OnMouseDown(std::move(data));
 	}
@@ -29,7 +38,10 @@ Events::MouseReleasedEvent::MouseReleasedEvent()
 
 void Events::MouseReleasedEvent::Handle()
 {
-	for (auto& listener : InputListener::m_InputListeners)
+	std::vector<Events::InputListener*> list;
+	list.insert(list.end(), InputListener::m_InputListeners.begin(), InputListener::m_InputListeners.end());
+
+	for (auto& listener : list)
 	{
 		listener->OnMouseReleased(std::move(data));
 	}
@@ -42,7 +54,10 @@ Events::MouseMotionEvent::MouseMotionEvent()
 
 void Events::MouseMotionEvent::Handle()
 {
-	for (auto& listener : InputListener::m_InputListeners)
+	std::vector<Events::InputListener*> list;
+	list.insert(list.end(), InputListener::m_InputListeners.begin(), InputListener::m_InputListeners.end());
+
+	for (auto& listener : list)
 	{
 		listener->OnMouseMotion(std::move(data));
 	}
@@ -50,12 +65,16 @@ void Events::MouseMotionEvent::Handle()
 
 Events::MouseWheelEvent::MouseWheelEvent()
 {
+	wheel = MouseWheel::WHEEL_NONE;
 	m_EventType = EventType::MOUSE_WHEEL;
 }
 
 void Events::MouseWheelEvent::Handle()
 {
-	for (auto& listener : InputListener::m_InputListeners)
+	std::vector<Events::InputListener*> list;
+	list.insert(list.end(), InputListener::m_InputListeners.begin(), InputListener::m_InputListeners.end());
+
+	for (auto& listener : list)
 	{
 		listener->OnMouseWheel(this);
 	}
@@ -68,7 +87,10 @@ Events::KeyDownEvent::KeyDownEvent()
 
 void Events::KeyDownEvent::Handle()
 {
-	for (auto& listener : InputListener::m_InputListeners)
+	std::vector<Events::InputListener*> list;
+	list.insert(list.end(), InputListener::m_InputListeners.begin(), InputListener::m_InputListeners.end());
+
+	for (auto& listener : list)
 	{
 		listener->OnKeyDown(std::move(key));
 	}
@@ -81,7 +103,10 @@ Events::KeyReleasedEvent::KeyReleasedEvent()
 
 void Events::KeyReleasedEvent::Handle()
 {
-	for (auto& listener : InputListener::m_InputListeners)
+	std::vector<Events::InputListener*> list;
+	list.insert(list.end(), InputListener::m_InputListeners.begin(), InputListener::m_InputListeners.end());
+
+	for (auto& listener : list)
 	{
 		listener->OnKeyReleased(std::move(key));
 	}

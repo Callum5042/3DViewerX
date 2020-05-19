@@ -69,7 +69,7 @@ namespace Events
 	{
 	public:
 		InputListener();
-		virtual ~InputListener() = default;
+		virtual ~InputListener();
 
 		virtual void OnMouseDown(MouseData&& data) { }
 		virtual void OnMouseReleased(MouseData&& data) { }
